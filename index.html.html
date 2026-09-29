@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leads por Mídia · Geely Eurovia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --asfalto:#16181a; --chapa:#1f2225; --chapa-alta:#26292d; --risco:#34393e;
+    --marca:#a4b8c3; --marca-escura:#6f818c; --texto:#e8e9ea; --apagado:#8b9095;
+    --ok:#4ade80; --alerta:#f87171; --atencao:#fbbf24;
+    --display:"Barlow Condensed","Arial Narrow",sans-serif;
+    --corpo:"Barlow","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"Courier New",monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{background:var(--asfalto);color:var(--texto);font-family:var(--corpo);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  .envelope{max-width:1360px;margin:0 auto;padding:24px 18px 72px}
+
+  .topo{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;border-bottom:2px solid var(--marca);padding-bottom:12px}
+  .topo h1{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:clamp(26px,4.4vw,40px);letter-spacing:.02em;line-height:.95;margin:0}
+  .topo h1 em{font-style:normal;color:var(--marca)}
+  .carimbo{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--asfalto);background:var(--marca);padding:5px 10px;white-space:nowrap}
+  .carimbo.secundaria{background:var(--chapa-alta);color:var(--apagado);border:1px solid var(--risco)}
+  .carimbo.secundaria b{color:var(--marca);font-weight:600}
+
+  .placar{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:1px;background:var(--risco);border:1px solid var(--risco);margin:20px 0 22px}
+  .placar div{background:var(--chapa);padding:12px 14px}
+  .placar span{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;color:var(--apagado);margin-bottom:3px}
+  .placar strong{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.02em}
+  .placar strong.destaque{color:var(--marca)}
+
+  nav{display:flex;gap:1px;background:var(--risco);border:1px solid var(--risco);margin-bottom:20px;flex-wrap:wrap}
+  nav button{flex:1;min-width:104px;font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:13px;padding:12px 8px;border:0;background:var(--chapa);color:var(--apagado);cursor:pointer}
+  nav button:hover{background:var(--chapa-alta);color:var(--texto)}
+  nav button[aria-selected="true"]{background:var(--marca);color:var(--asfalto)}
+  nav button:focus-visible{outline:2px solid var(--marca);outline-offset:-4px}
+  nav button .trava{font-size:10px;opacity:.75;letter-spacing:0}
+
+  .painel[hidden]{display:none}
+  .bloco{background:var(--chapa);border:1px solid var(--risco);margin-bottom:20px}
+  .bloco > h2{font-family:var(--display);font-weight:600;text-transform:uppercase;font-size:13px;letter-spacing:.16em;margin:0;padding:11px 14px;border-bottom:1px solid var(--risco);color:var(--apagado);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .miolo{padding:14px}
+  .duplo{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,4fr);gap:18px;align-items:start}
+  @media(max-width:940px){.duplo{grid-template-columns:1fr}}
+
+  input[type=number],input[type=text],input[type=url],select{background:var(--asfalto);color:var(--texto);border:1px solid var(--risco);font-family:var(--mono);font-size:13px;padding:8px 10px;width:100%}
+  input:focus,select:focus{outline:2px solid var(--marca);outline-offset:-1px}
+  label.campo{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:10.5px;color:var(--apagado);margin-bottom:4px}
+
+  .barra{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  button.acao{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:12.5px;padding:9px 15px;border:1px solid var(--risco);cursor:pointer;background:var(--chapa-alta);color:var(--texto)}
+  button.acao:hover{background:var(--risco)}
+  button.acao:focus-visible{outline:2px solid var(--marca);outline-offset:2px}
+  button.acao.principal{background:var(--marca);color:var(--asfalto);border-color:var(--marca)}
+  button.acao.principal:hover{background:#c2d3db}
+  button.acao.perigo{border-color:#6b2b2b;color:var(--alerta)}
+  button.acao.miudo{padding:6px 11px;font-size:11.5px;letter-spacing:.08em}
+  .controles{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .controles label{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:10.5px;color:var(--apagado)}
+
+  button.acao.destaque-btn{border-color:var(--marca);color:var(--marca)}
+  button.acao.destaque-btn:hover{background:var(--marca);color:var(--asfalto)}
+  #tela-slide{width:100%;height:auto;display:block;border:1px solid var(--risco)}
+  .rolagem{overflow-x:auto;margin:0 -14px;padding:0 14px}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px}
+  th,td{border:1px solid var(--risco);padding:6px 7px;text-align:center;white-space:nowrap}
+  thead th{background:var(--marca);color:var(--asfalto);font-family:var(--display);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+  thead th.pctcol{background:#8fa5b1}
+  thead tr.sub th{background:#93a9b5}
+  thead th.ordenavel{cursor:pointer;user-select:none}
+  thead th.ordenavel:hover{background:#c2d3db}
+  thead th.ordenavel::after{content:"⇅";opacity:.32;margin-left:5px;font-size:10px}
+  thead th.ordenavel.ativa{background:var(--asfalto);color:var(--marca)}
+  thead th.ordenavel.ativa::after{content:attr(data-seta);opacity:1}
+  tbody th{background:var(--chapa-alta);color:var(--texto);text-align:left;font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  td.zero{color:#4e5359}
+  td.forte{background:var(--chapa-alta);font-weight:600}
+  tfoot th,tfoot td{background:#101214;font-weight:600;border-top:2px solid var(--marca)}
+  tfoot th{font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;text-align:left}
+  td.pct-alto{color:var(--ok)} td.pct-medio{color:var(--atencao)} td.pct-baixo{color:var(--alerta)}
+  table.editavel input{width:88px;padding:4px 5px;text-align:center;font-size:12px}
+  table input.editado{border-color:var(--marca);color:var(--marca)}
+  .legenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--apagado)}
+  .legenda b{color:var(--texto);font-weight:600}
+  .legenda .pct-alto{color:var(--ok)} .legenda .pct-medio{color:var(--atencao)} .legenda .pct-baixo{color:var(--alerta)}
+
+  .funil{display:flex;flex-direction:column;gap:9px}
+  .etapa{display:grid;grid-template-columns:96px 1fr 74px;gap:10px;align-items:center}
+  .etapa .rot{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--apagado)}
+  .etapa .trilho{background:var(--asfalto);border:1px solid var(--risco);height:22px;position:relative;overflow:hidden}
+  .etapa .fita{background:var(--marca);height:100%;min-width:2px}
+  .etapa .fita.fria{background:#5b6167}
+  .etapa .num{font-family:var(--mono);font-size:13px;text-align:right}
+  .etapa .num small{display:block;color:var(--apagado);font-size:10.5px}
+  .perda{font-family:var(--mono);font-size:11px;color:var(--alerta);padding-left:106px;margin-top:-4px}
+
+  .area-anexo{border:2px dashed var(--risco);background:var(--asfalto);padding:24px 18px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:center;transition:border-color .15s,background .15s}
+  .area-anexo:hover,.area-anexo.sobre{border-color:var(--marca);background:var(--chapa-alta)}
+  .area-anexo strong{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:14px;color:var(--marca)}
+  .area-anexo span{font-size:12.5px;color:var(--apagado)}
+  .area-anexo.pronta{border-style:solid;border-color:#2f5d3f}
+  .area-anexo.pronta strong{color:var(--ok)}
+
+  .opcoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .opcao{display:flex;align-items:center;gap:6px;border:1px solid var(--risco);background:var(--chapa-alta);
+    padding:5px 9px;font-family:var(--mono);font-size:11.5px;color:var(--texto);cursor:pointer}
+  .opcao input{width:auto;accent-color:var(--marca)}
+  .opcao b{color:var(--marca);font-weight:600}
+  .semanas{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .sem{font-family:var(--mono);font-size:11.5px;padding:7px 11px;border:1px solid var(--risco);background:var(--asfalto);
+    color:var(--texto);cursor:pointer;display:flex;gap:8px;align-items:baseline;transition:border-color .12s}
+  .sem:hover{border-color:var(--marca)}
+  .sem .rotulo{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+  .sem .faixa{color:var(--apagado);font-size:10px}
+  .sem b{color:var(--marca);font-weight:600}
+  .sem.vazia{opacity:.45}
+  .sem.escolhida{background:var(--marca);border-color:var(--marca);color:var(--asfalto)}
+  .sem.escolhida .faixa{color:#5a4a00} .sem.escolhida b{color:var(--asfalto)}
+  .sem .marca{font-family:var(--display);font-size:10px;letter-spacing:.1em}
+  .semanas .aviso{font-family:var(--mono);font-size:11.5px;color:var(--apagado)}
+  .filtro{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .filtro .rot{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;color:var(--apagado);margin-right:4px}
+  .chip{font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-size:12px;padding:8px 14px;
+    border:1px solid var(--risco);background:var(--chapa);color:var(--apagado);cursor:pointer;transition:border-color .12s,color .12s}
+  .chip:hover{border-color:var(--marca);color:var(--texto)}
+  .chip.ativo{background:var(--marca);border-color:var(--marca);color:var(--asfalto);font-weight:600}
+  .chip:focus-visible{outline:2px solid var(--marca);outline-offset:2px}
+  .chip b{font-family:var(--mono);font-weight:600;margin-left:6px;letter-spacing:0}
+  .grade-anexos{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.grade-anexos{grid-template-columns:1fr}}
+  .grade-mapa{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px}
+  .par-mapa{display:grid;grid-template-columns:1fr 118px;gap:6px}
+  .caixa{margin-top:12px;border:1px solid var(--risco);background:var(--asfalto);padding:10px 12px;font-family:var(--mono);font-size:11.5px;color:var(--apagado);line-height:1.7}
+  .caixa b{color:var(--texto);font-weight:600}
+  .dica .aten{color:var(--atencao)}
+  .caixa .ok{color:var(--ok)} .caixa .ruim{color:var(--alerta)} .caixa .aten{color:var(--atencao)}
+  .selo-estado{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:none;color:var(--apagado);font-weight:400}
+  .selo-estado.ok{color:var(--ok)} .selo-estado.ruim{color:var(--alerta)}
+  .dica{margin-top:11px;font-size:12.5px;color:var(--apagado)}
+  .dica code{font-family:var(--mono);color:var(--marca);font-size:12px}
+  .recado{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ok);opacity:0;transition:opacity .18s}
+  .recado.visivel{opacity:1}
+  .avisos{margin-top:14px;border:1px solid #6b2b2b;background:#241a1a;padding:11px 13px}
+  .avisos h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:11.5px;margin:0 0 7px;color:var(--alerta)}
+  .avisos ul{margin:0;padding-left:17px} .avisos li{font-size:13px;margin-bottom:3px}
+  .vazio{padding:40px 18px;text-align:center;color:var(--apagado);font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:13px}
+  .historico{font-family:var(--mono);font-size:12px;max-height:260px;overflow-y:auto;border:1px solid var(--risco);background:var(--asfalto)}
+  .historico div{padding:7px 10px;border-bottom:1px solid var(--risco);display:flex;gap:12px;flex-wrap:wrap}
+  .historico div:last-child{border-bottom:0}
+  .historico b{color:var(--marca);font-weight:600}
+  .historico span{color:var(--apagado)}
+  .grade-fontes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--risco);border:1px solid var(--risco)}
+  .grade-fontes > div{background:var(--asfalto);padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:1.7}
+  .grade-fontes b{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--marca);margin-bottom:3px}
+  .grade-fontes .colunas{color:var(--texto)}
+  .grade-fontes .quando{color:var(--apagado)}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+  thead tr.sub th{background:#93a9b5}
+  thead th.dep{background:#8fa5b1;font-size:11px}
+  th.canal{min-width:172px}
+  .bloco.loja > h2 em{font-style:normal;color:var(--marca)}
+  td.conv{background:var(--chapa-alta);font-weight:600}
+</style>
+</head>
+<body>
+<div class="envelope">
+
+  <header class="topo">
+    <h1>Geely · leads por <em>mídia</em></h1>
+    <span class="carimbo" id="carimbo-mes">Agosto 2026 · Geely</span>
+    <span class="carimbo secundaria" id="carimbo-fonte">Sem atualização nesta sessão</span>
+  </header>
+
+  <div class="placar" id="placar"></div>
+
+  <nav role="tablist">
+    <button role="tab" data-aba="canais" aria-selected="true">Canais por loja</button>
+    <button role="tab" data-aba="lancar" aria-selected="false">Lançar à mão <span class="trava" id="trava-lancar">🔒</span></button>
+    <button role="tab" data-aba="ajustes" aria-selected="false">Ajustes <span class="trava" id="trava-ajustes">🔒</span></button>
+  </nav>
+
+  <section class="painel" id="aba-canais">
+    <div class="filtro" id="filtro"></div>
+
+    <div class="bloco" id="bloco-geral">
+      <h2>Total geral <span class="selo-estado" id="selo-geral"></span>
+        <span class="controles">
+          <button class="acao miudo destaque-btn" data-slide="geral">Slide</button>
+        </span>
+      </h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-geral"></div>
+        <div class="legenda">
+          <span><b>%conv.:</b> vendas sobre entrantes, somando VN e VDA</span>
+          <span class="pct-alto">acima do total</span>
+          <span class="pct-medio">igual</span>
+          <span class="pct-baixo">abaixo</span>
+        </div>
+        <div class="barra">
+          <button class="acao miudo" data-copiar="geral">Copiar tabela</button>
+          <span class="recado" id="recado-geral">Copiado</span>
+        </div>
+        <p class="dica" id="dica-geral"></p>
+      </div>
+    </div>
+
+    <div id="blocos-lojas"></div>
+  </section>
+
+  <section class="painel" id="aba-lancar" hidden>
+    <div class="bloco">
+      <h2>Lançamento manual <span class="selo-estado" id="selo-manual">grava a cada campo alterado</span>
+        <span class="controles">
+          <label for="sel-loja-manual">Loja</label>
+          <select id="sel-loja-manual" style="width:auto"></select>
+        </span>
+      </h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-manual"></div>
+        <div class="barra">
+          <button class="acao" id="btn-zerar-manual">Zerar esta loja</button>
+          <button class="acao miudo" id="btn-soltar-manual">Voltar a usar o relatório</button>
+          <span class="recado" id="recado-manual">Salvo</span>
+        </div>
+        <div class="caixa" id="caixa-manual"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bloco" id="bloco-slide" hidden>
+    <h2 id="titulo-slide">Slide
+      <span class="controles">
+        <label for="sel-tamanho">Tamanho</label>
+        <select id="sel-tamanho" style="width:auto">
+          <option value="pequeno">Pequeno · 1200×675</option>
+          <option value="medio">Médio · 1600×900</option>
+          <option value="grande">Grande · 1920×1080</option>
+        </select>
+        <button class="acao miudo principal" id="btn-copiar-slide">Copiar imagem</button>
+        <button class="acao miudo" id="btn-baixar-slide">Baixar PNG</button>
+        <button class="acao miudo" id="btn-fechar-slide">Fechar</button>
+        <span class="recado" id="recado-slide">Copiado</span>
+      </span>
+    </h2>
+    <div class="miolo">
+      <canvas id="tela-slide" width="1920" height="1080"></canvas>
+      <p class="dica">Clique em <b>Copiar imagem</b> e cole direto no WhatsApp ou no e-mail. Se o navegador bloquear a cópia, ele baixa o PNG automaticamente.</p>
+    </div>
+  </div>
+
+  <section class="painel" id="aba-ajustes" hidden>
+    <div class="bloco">
+      <h2>O que já foi lido <span class="selo-estado" id="selo-composicao"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-cobertura"></div>
+        <p class="dica">Cada etapa tem o seu relatório. Reimportar substitui só aquela etapa, sem tocar nas outras, e as vendas ficam por conta do lançamento manual.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Anexar os relatórios de mergulho <span class="selo-estado" id="selo-arquivo">nenhum arquivo carregado</span></h2>
+      <div class="miolo">
+        <div class="grade-anexos">
+          <div>
+            <label class="campo">1 · Entrantes <span class="selo-estado" id="selo-ent">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="ent">
+              <strong>Anexar entrantes</strong>
+              <span>relatório <b>Mergulho por Empresa · Fluxo Total Dia</b></span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="ent" accept=".xlsx,.xls,.csv" multiple hidden>
+            </div>
+          </div>
+          <div>
+            <label class="campo">2 · Agendados <span class="selo-estado" id="selo-ag">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="ag">
+              <strong>Anexar agendados</strong>
+              <span>relatório <b>Mergulho por Empresa · Cli. Agendados</b></span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="ag" accept=".xlsx,.xls,.csv" multiple hidden>
+            </div>
+          </div>
+          <div>
+            <label class="campo">3 · Fluxo, comparecidos agendados <span class="selo-estado" id="selo-cAg">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="cAg">
+              <strong>Anexar fluxo, agendados</strong>
+              <span>relatório <b>Mergulho por Empresa · Comp. Agendado</b></span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="cAg" accept=".xlsx,.xls,.csv" multiple hidden>
+            </div>
+          </div>
+          <div>
+            <label class="campo">4 · Fluxo, comparecidos não agendados <span class="selo-estado" id="selo-cNao">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="cNao">
+              <strong>Anexar fluxo, não agendados</strong>
+              <span>relatório <b>Mergulho por Empresa · Comp. Não Agendado</b></span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="cNao" accept=".xlsx,.xls,.csv" multiple hidden>
+            </div>
+          </div>
+          <div>
+            <label class="campo">5 · Vendas e faturados <span class="selo-estado" id="selo-vd">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="vd">
+              <strong>Anexar vendas</strong>
+              <span>planilha <b>Vendas Leads Geely</b>, uma aba por mês</span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="vd" accept=".xlsx,.xls,.csv" hidden>
+            </div>
+          </div>
+        </div>
+        <div id="mapa-midia"></div>
+        <p class="dica">Cada etapa tem o seu botão e o seu relatório, na ordem do funil. As duas partes do fluxo somam na mesma coluna. A <b>loja</b> sai da coluna <code>Empresa</code>, o <b>canal</b> da coluna <code>Midia</code> e o <b>departamento</b> da coluna <code>Tipo Evento</code>. Todas as linhas entram: não há descarte por motivo de conclusão, e o tipo de evento sem departamento definido é avisado na importação. As <b>vendas</b> vêm da aba Lançar à mão.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Tipo de evento e departamento <span class="selo-estado" id="selo-evento"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-evento"></div>
+        <div class="barra">
+          <button class="acao miudo" id="btn-evento-padrao">Voltar ao padrão</button>
+          <span class="recado" id="recado-evento">Salvo</span>
+        </div>
+        <p class="dica">O departamento sai daqui, da coluna <code>Tipo Evento</code> do relatório. Já vêm definidos <b>NOVOS WEB</b> em VN, <b>NOVOS WEB - MOVE BRASIL</b> e <b>VENDA DIRETA WEB</b> em VDA. Tipo novo entra como <b>não definido</b> e não é contado até você escolher.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Vendas pelo Google Sheets <span class="selo-estado" id="selo-google">nenhum link configurado</span></h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div style="grid-column:1/-1"><label class="campo" for="link-vendas">Link da planilha de vendas</label>
+            <input type="url" id="link-vendas" spellcheck="false" placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=0"></div>
+          <div><label class="campo" for="aba-google">Aba do mês</label>
+            <input type="text" id="aba-google" spellcheck="false" placeholder="SETEMBRO2026"></div>
+        </div>
+        <div class="barra">
+          <button class="acao principal" id="btn-ler-google">Ler vendas do Google</button>
+          <button class="acao miudo" id="btn-abrir-google">Abrir planilha</button>
+          <span class="recado" id="recado-google">Pronto</span>
+        </div>
+        <div class="caixa" id="caixa-google"></div>
+        <p class="dica">O link vale como base fixa: fica guardado e você só troca a aba a cada mês. A planilha precisa estar aberta para leitura — em <b>Compartilhar</b>, deixe como <i>qualquer pessoa com o link</i>. O anexo do arquivo continua funcionando e serve de plano B.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Backup no Google Drive <span class="selo-estado" id="selo-drive">não configurado</span></h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div style="grid-column:1/-1"><label class="campo" for="url-drive">Endereço do app de backup</label>
+            <input type="url" id="url-drive" spellcheck="false" placeholder="https://script.google.com/macros/s/.../exec"></div>
+          <div><label class="campo" for="auto-drive">Ao abrir o painel</label>
+            <select id="auto-drive">
+              <option value="0">Não carregar sozinho</option>
+              <option value="1">Carregar o último backup do Drive</option>
+            </select></div>
+        </div>
+        <div class="barra">
+          <button class="acao principal" id="btn-subir-drive">Subir backup agora</button>
+          <button class="acao" id="btn-baixar-drive">Carregar do Drive</button>
+          <button class="acao miudo" id="btn-testar-drive">Testar conexão</button>
+          <span class="recado" id="recado-drive">Pronto</span>
+        </div>
+        <div class="caixa" id="caixa-drive"></div>
+        <p class="dica">Serve para abrir o painel em outro computador com os mesmos números. O envio é manual, no botão, e guarda um arquivo por vez na pasta do Drive. O passo a passo para criar o app está no arquivo <code>backup-drive.gs</code> que mandei junto.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>PF/PJ e departamento <span class="selo-estado" id="selo-depvenda"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-depvenda"></div>
+        <p class="dica">Na planilha de vendas o departamento sai da coluna <code>PF / VD</code>, e a loja da coluna <code>LOJA</code>. <b>Venda</b> é a linha cuja data cai no mês da aba; <b>faturado</b> é toda linha com NF preenchida, mesmo que a venda seja de outro mês. Já vêm definidos <b>PF</b> em VN e <b>VD</b> em VDA. Valor novo entra como <b>não definido</b> e a venda não é contada até você escolher.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Tipo da mídia e canal <span class="selo-estado" id="selo-mapa"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-mapa"></div>
+        <div class="barra">
+          <button class="acao miudo" id="btn-mapa-padrao">Voltar ao mapa padrão</button>
+          <span class="recado" id="recado-mapa">Salvo</span>
+        </div>
+        <p class="dica" id="dica-reagrupar"></p>
+        <p class="dica">O que aparece no relatório é o <b>tipo da mídia</b>; o painel agrupa no <b>canal</b> que você escolher. A grafia é respeitada: <code>GOOGLE</code> e <code>Google</code> entram como duas linhas, cada uma com o seu canal, e ficam lado a lado na lista, com a coluna <b>Grafia</b> dizendo qual é qual. Tipo novo que apareça na importação entra como <b>OUTROS</b> até você direcionar. Se você já tinha um mapa da versão anterior, ele foi convertido para a grafia que apareceu primeiro — a outra entra na próxima importação.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Lojas Geely <span class="selo-estado" id="selo-lojas"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-lojas"></div>
+        <div class="grade-mapa" style="margin-top:12px">
+          <div><label class="campo" for="nova-loja">Nome da loja</label>
+            <input type="text" id="nova-loja" spellcheck="false" placeholder="IMBIRIBEIRA"></div>
+          <div><label class="campo" for="nova-praca">Praça</label>
+            <select id="nova-praca">
+              <option value="PERNAMBUCO">Pernambuco</option>
+              <option value="PARAÍBA">Paraíba</option>
+              <option value="BAHIA">Bahia</option>
+            </select></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="acao principal" id="btn-add-loja">Incluir loja</button></div>
+        </div>
+        <p class="dica">O painel abre com uma loja de exemplo. Inclua as lojas Geely aqui e elas passam a aparecer no filtro, nas tabelas, no lançamento manual e na importação. Remover uma loja apaga os números dela.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Regras de cálculo</h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div>
+            <label class="campo" for="rotulo-mes">Carimbo do mês</label>
+            <input type="text" id="rotulo-mes" spellcheck="false">
+          </div>
+          <div>
+            <label class="campo" for="sel-vazias">Lojas sem dado</label>
+            <select id="sel-vazias">
+              <option value="0">Esconder</option>
+              <option value="1">Mostrar zeradas</option>
+            </select>
+          </div>
+        </div>
+        <p class="dica">Entrantes saem da coluna <b>Fluxo Total Dia</b> do relatório, agendados de <b>Cli. Agendados</b>, fluxo da soma de <b>Comp. Agendado</b> com <b>Comp. Não Agendado</b>, e vendas de <b>Vendidos</b>. Dá para trocar cada uma na hora da importação.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Histórico de importações <span class="selo-estado" id="estado-base"></span></h2>
+      <div class="miolo">
+        <div class="historico" id="historico"></div>
+        <div class="barra">
+          <button class="acao" id="btn-backup">Baixar backup completo</button>
+          <button class="acao" id="btn-restaurar">Restaurar backup</button>
+          <button class="acao" id="btn-exportar">Baixar CSV</button>
+          <input type="file" id="arquivo-backup" accept="application/json" hidden>
+          <span class="recado" id="recado-dados">Pronto</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Zona de risco</h2>
+      <div class="miolo">
+        <div class="barra"><button class="acao perigo" id="btn-zerar">Apagar tudo</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============ domínio ============ */
+/* a lista de lojas da Geely é sua: mexe em Ajustes, sem tocar no código.
+   os arrays são mutados no lugar para que o resto do painel enxergue a mudança. */
+const LOJAS_PADRAO=[{nome:'IMBIRIBEIRA',praca:'PERNAMBUCO'}];
+const LOJAS=[]; const NOMES=[];
+const PRACAS=['PERNAMBUCO','PARAÍBA','BAHIA'];
+const PRACA_LOJAS={};
+const pracaDe=n=>(LOJAS.find(l=>l.nome===n)||{}).praca;
+function aplicarLojas(lista){
+  LOJAS.length=0; NOMES.length=0;
+  (lista&&lista.length?lista:LOJAS_PADRAO).forEach(l=>{
+    const nome=String(l.nome||'').trim().toUpperCase();
+    if(!nome||NOMES.indexOf(nome)>=0) return;
+    const praca=PRACAS.indexOf(l.praca)>=0?l.praca:PRACAS[0];
+    LOJAS.push({nome,praca}); NOMES.push(nome);
+  });
+  PRACAS.forEach(p=>PRACA_LOJAS[p]=NOMES.filter(n=>pracaDe(n)===p));
+  montarApelidos();
+}
+
+const DEPS=[{k:'vn',rot:'VN'},{k:'vd',rot:'VDA'}];
+const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+const chave=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+/* o reconhecimento da loja na coluna Empresa acompanha a lista editável:
+   é remontado a cada mudança, senão loja nova nunca seria encontrada. */
+let MAPA_LOJA={}, APELIDOS=[];
+function montarApelidos(){
+  MAPA_LOJA={}; APELIDOS=[];
+  NOMES.forEach(n=>{ MAPA_LOJA[chave(n)]=n; APELIDOS.push({loja:n,ch:chave(n)}); });
+  const extras={epitacio:'EPITÁCIO',epitaciopessoa:'EPITÁCIO',laurodefreitas:'LAURO'};
+  Object.keys(extras).forEach(k=>{ if(NOMES.indexOf(extras[k])>=0){ MAPA_LOJA[k]=extras[k]; APELIDOS.push({loja:extras[k],ch:k}); } });
+  /* nomes mais longos primeiro, para 'LAURO DE FREITAS' não cair antes em 'LAURO' */
+  APELIDOS.sort((a,b)=>b.ch.length-a.ch.length);
+}
+function acharLoja(cru){
+  const c=chave(cru); if(!c) return null;
+  if(MAPA_LOJA[c]) return MAPA_LOJA[c];
+  const bate=APELIDOS.find(a=>c.indexOf(a.ch)>=0);
+  return bate?bate.loja:null;
+}
+
+aplicarLojas(LOJAS_PADRAO);
+
+/* canais na ordem da planilha */
+const CANAIS=['SITE MONTADORA','SITE EUROVIA','REDES SOCIAIS','WHATSAPP FACEBOOK / INSTAGRAM','INSTAGRAM DIRECT',
+  'GOOGLE','WHATSAPP GOOGLE','OLX','WEBMOTORS','LP RYPE','INDICAÇÃO LEADS','OUTROS'];
+const SEM_CLASSE='OUTROS';
+/* tipo da mídia como sai no relatório → canal */
+/* na Geely os tipos de mídia ainda não estão mapeados: cada um que aparecer
+   na importação entra como OUTROS e você direciona o canal na tela. */
+const MAPA_PADRAO={};
+/* nomes usados antes desta versão, para o dado já gravado não se perder */
+/* nomes de canal usados antes, para o que já está gravado não se perder */
+const CANAL_ANTIGO={'WHATSAPP R. SOCIAIS':'WHATSAPP FACEBOOK / INSTAGRAM','MONTADORA':'SITE MONTADORA'};
+function mapaInicial(){
+  const m={},r={};
+  Object.keys(MAPA_PADRAO).forEach(k=>{ m[chave(k)]=MAPA_PADRAO[k]; r[chave(k)]=k; });
+  return {mapa:m,rotulos:r};
+}
+/* GOOGLE e Google são linhas diferentes no mapa: o relatório distingue as duas
+   grafias e cada uma pode ir para um canal seu. */
+const chaveMidia=s=>String(s==null?'':s).trim().replace(/\s+/g,' ');
+/* Link fixo da planilha de vendas: troque aqui e o painel já abre apontando
+   para ela. O que você digitar em Ajustes vale por cima deste valor. */
+const LINK_VENDAS_PADRAO='https://docs.google.com/spreadsheets/d/1fosg38GfRRib1lgG7AopyArG835aBA7xUJyiStsUr5M/edit?usp=sharing';
+
+/* departamento das vendas, coluna PF/PJ da planilha */
+const DEP_VENDA_PADRAO={'PF':'vn','VD':'vd'};
+function mapaDepVendaInicial(){
+  const m={},r={};
+  Object.keys(DEP_VENDA_PADRAO).forEach(k=>{ m[chave(k)]=DEP_VENDA_PADRAO[k]; r[chave(k)]=k; });
+  return {mapa:m,rotulos:r};
+}
+
+/* departamento por tipo de evento, coluna E do relatório */
+const EVENTO_PADRAO={'NOVOS WEB':'vn','NOVOS WEB - MOVE BRASIL':'vd','VENDA DIRETA WEB':'vd'};
+function mapaEventoInicial(){
+  const m={},r={};
+  Object.keys(EVENTO_PADRAO).forEach(k=>{ m[chave(k)]=EVENTO_PADRAO[k]; r[chave(k)]=k; });
+  return {mapa:m,rotulos:r};
+}
+
+const canalDe=cru=>{
+  const m=estado.config.mapaMidia||{};
+  let v=m[chaveMidia(cru)];
+  if(v===undefined) v=m[chave(cru)];   /* mapas gravados antes desta versão */
+  return CANAIS.indexOf(v)>=0 ? v : (CANAL_ANTIGO[v]||SEM_CLASSE);
+};
+/* só a grafia exata conta: assim GOOGLE e Google entram como duas linhas */
+const mapeada=cru=>(chaveMidia(cru) in (estado.config.mapaMidia||{}));
+/* converte mapas antigos, que guardavam a chave sem maiúsculas nem acentos */
+function migrarMapa(){
+  const m=estado.config.mapaMidia||{}, r=estado.config.rotulosMidia||{};
+  let mudou=false;
+  Object.keys(m).forEach(k=>{
+    const rot=r[k]||k;
+    const nova=chaveMidia(rot);
+    if(nova===k) return;
+    if(!(nova in m)) m[nova]=m[k];
+    r[nova]=rot;
+    delete m[k]; delete r[k];
+    mudou=true;
+  });
+  estado.config.mapaMidia=m; estado.config.rotulosMidia=r;
+  return mudou;
+}
+
+/* etapas do relatório e o que cada uma alimenta */
+const ETAPAS_ARQ=[
+  {k:'ent',rot:'Entrantes',cab:'Fluxo Total Dia'},
+  {k:'ag',rot:'Agendados',cab:'Cli. Agendados'},
+  {k:'cAg',rot:'Comparecidos agendados',cab:'Comp. Agendado'},
+  {k:'cNao',rot:'Comparecidos não agendados',cab:'Comp. Não Agendado'},
+  {k:'vd',rot:'Vendas',cab:'Vendidos'}];
+const CAMPOS=['ent','ag','cAg','cNao','vd','ft'];
+
+const vazio=()=>{
+  const o={};
+  NOMES.forEach(n=>{ o[n]={};
+    DEPS.forEach(d=>{ o[n][d.k]={};
+      CANAIS.forEach(m=>{ o[n][d.k][m]={}; CAMPOS.forEach(c=>o[n][d.k][m][c]=0); }); }); });
+  return o;
+};
+
+const PADRAO={
+  manual:{},
+  config:Object.assign({rotuloMes:'Agosto 2026 · Geely',tamanhoSlide:'pequeno',mostrarVazias:false,lojas:LOJAS_PADRAO.slice(),
+    linkVendas:LINK_VENDAS_PADRAO,abaVendas:'',urlDrive:'',autoDrive:false},
+    (function(){const i=mapaInicial(), e=mapaEventoInicial();
+      const v=mapaDepVendaInicial();
+      return {mapaMidia:i.mapa,rotulosMidia:i.rotulos,mapaEvento:e.mapa,rotulosEvento:e.rotulos,
+        mapaDepVenda:v.mapa,rotulosDepVenda:v.rotulos};})()),
+  dados:vazio(),
+  fontes:{}
+};
+/* loja|dep marcados aqui têm as vendas digitadas à mão, e a importação não as sobrescreve */
+
+let estado=JSON.parse(JSON.stringify(PADRAO));
+let historico=[];
+let bruto=null;
+let atualizadoEm=null;
+let baseViva=false;
+const memoria={};
+const CHAVE='eurovia:midia-geely:v1:';
+
+/* ============ trava ============ */
+const SENHA='brennda1999';
+let destravado=false;
+const ABAS_TRAVADAS={lancar:'para abrir o lançamento manual',ajustes:'para abrir os ajustes'};
+function marcarTrava(){
+  ['lancar','ajustes'].forEach(k=>{ const t=document.getElementById('trava-'+k); if(t) t.textContent=destravado?'':'🔒'; });
+}
+function liberar(motivo){
+  if(destravado) return true;
+  const s=prompt('Senha '+motivo+':');
+  if(s===null) return false;
+  if(s.trim()===SENHA){ destravado=true; marcarTrava(); return true; }
+  alert('Senha incorreta.');
+  return false;
+}
+
+/* ============ persistência ============ */
+function guardarLocal(k,s){ try{ localStorage.setItem(CHAVE+k,s); return true; }catch(e){ return false; } }
+function buscarLocal(k){ try{ return localStorage.getItem(CHAVE+k); }catch(e){ return null; } }
+async function guardar(k,v){
+  const s=JSON.stringify(v);
+  try{ if(window.storage){ await window.storage.set(CHAVE+k,s); baseViva=true; return; } }catch(e){}
+  if(guardarLocal(k,s)){ baseViva=true; return; }
+  baseViva=false; memoria[k]=s;
+}
+async function buscar(k){
+  try{ if(window.storage){ const r=await window.storage.get(CHAVE+k); baseViva=true; if(r&&r.value) return JSON.parse(r.value); return null; } }catch(e){}
+  const l=buscarLocal(k);
+  if(l!==null){ baseViva=true; try{ return JSON.parse(l); }catch(e){ return null; } }
+  return memoria[k]?JSON.parse(memoria[k]):null;
+}
+async function salvarTudo(quieto){
+  await guardar('config',estado.config);
+  await guardar('dados',estado.dados);
+  await guardar('manual',estado.manual||{});
+  await guardar('fontes',estado.fontes);
+  await guardar('historico',historico);
+  if(!quieto){ atualizadoEm=new Date().toISOString(); await guardar('atualizado',atualizadoEm); }
+  marcarEstado();
+}
+async function carregarTudo(){
+  const c=await buscar('config'),d=await buscar('dados'),f=await buscar('fontes'),h=await buscar('historico');
+  const mv=await buscar('manual'); estado.manual=(mv&&typeof mv==='object')?mv:{};
+  /* chaves antigas eram loja|dep e valiam só para vendas */
+  Object.keys(estado.manual).forEach(k=>{
+    if(k.split('|').length===2){ estado.manual[k+'|vd']=true; delete estado.manual[k]; }
+  });
+  if(c) estado.config=Object.assign({},PADRAO.config,c);
+  aplicarLojas(estado.config.lojas);
+  migrarMapa();
+  /* o descarte por motivo saiu do painel: limpa o que ficou gravado */
+  delete estado.config.filtros; delete estado.config.motivosFora;
+  if(d) estado.dados=normalizar(d);
+  if(f&&typeof f==='object') estado.fontes=f;
+  if(Array.isArray(h)) historico=h;
+  const at=await buscar('atualizado'); if(at) atualizadoEm=at;
+}
+function normalizar(d){
+  const o=vazio();
+  NOMES.forEach(n=>DEPS.forEach(dep=>{
+    const vindo=(((d||{})[n]||{})[dep.k])||{};
+    Object.keys(vindo).forEach(m=>{
+      const alvo = CANAIS.indexOf(m)>=0 ? m : (CANAL_ANTIGO[m]||SEM_CLASSE);
+      CAMPOS.forEach(c=>{ o[n][dep.k][alvo][c]+=Math.max(0,Math.round(+((vindo[m]||{})[c])||0)); });
+    });
+  }));
+  return o;
+}
+function marcarEstado(){
+  const el=document.getElementById('estado-base');
+  if(el){
+    el.textContent = baseViva ? historico.length+' registros no histórico'
+      : 'atenção: gravando só nesta sessão — baixe o backup antes de fechar';
+    el.className='selo-estado'+(baseViva?'':' ruim');
+  }
+  marcarCarimbo();
+}
+function marcarCarimbo(){
+  const mes=document.getElementById('carimbo-mes');
+  if(mes) mes.textContent=estado.config.rotuloMes||'Geely';
+  const el=document.getElementById('carimbo-fonte'); if(!el) return;
+  if(!atualizadoEm){ el.textContent='Sem atualização nesta sessão'; return; }
+  const q=new Date(atualizadoEm), hoje=new Date();
+  const hora=q.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  el.innerHTML = q.toDateString()===hoje.toDateString()
+    ? 'Atualizado às <b>'+hora+'</b>'
+    : 'Atualizado em <b>'+q.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+'</b> às <b>'+hora+'</b>';
+}
+
+/* ============ cálculos ============ */
+const pct=(a,b)=>b>0?a/b:0;
+const fmtPct=x=>(x*100).toFixed(0)+'%';
+const fmtNum=x=>Math.round(x).toLocaleString('pt-BR');
+const classeComp=(x,ref)=>{
+  const a=Math.round(x*100), b=Math.round(ref*100);
+  if(a>=100) return 'pct-alto';
+  return a>b?'pct-alto':(a===b?'pct-medio':'pct-baixo');
+};
+let praca=null, lojaSel=null;
+const lojasAtivas=()=>{
+  if(lojaSel) return [lojaSel];
+  return praca ? PRACA_LOJAS[praca].slice() : NOMES.slice();
+};
+const rotuloAtivo=()=> lojaSel || praca || 'Eurovia';
+
+/* célula de um canal: VN e VDA separados em cada etapa */
+function celula(lojas,canais){
+  const un=dk=>{
+    const t={ent:0,ag:0,fl:0,vd:0,ft:0};
+    lojas.forEach(n=>canais.forEach(m=>{
+      const r=(((estado.dados[n]||{})[dk]||{})[m])||{};
+      t.ent+=+r.ent||0; t.ag+=+r.ag||0; t.fl+=(+r.cAg||0)+(+r.cNao||0); t.vd+=+r.vd||0; t.ft+=+r.ft||0;
+    }));
+    return t;
+  };
+  const vn=un('vn'), vd=un('vd');
+  const ent=vn.ent+vd.ent, vend=vn.vd+vd.vd;
+  return {vn,vd,ent,vend,temEnt:ent>0,conv:pct(vend,ent),
+    total:{ent:ent,ag:vn.ag+vd.ag,fl:vn.fl+vd.fl,vd:vend,ft:vn.ft+vd.ft}};
+}
+const temDado=lojas=>{
+  const c=celula(lojas,CANAIS);
+  return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
+};
+const lojasComDado=()=>lojasAtivas().filter(n=>temDado([n]));
+
+/* ============ tabela no formato da planilha ============ */
+const ETAPAS_TAB=[['ent','Entrantes'],['ag','Agendados'],['fl','Fluxo'],['vd','Vendas'],['ft','Faturados']];
+function tabelaCanais(lojas){
+  const geral=celula(lojas,CANAIS);
+  const usados=CANAIS.filter(m=>{
+    if(estado.config.mostrarVazias) return true;
+    const c=celula(lojas,[m]);
+    return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
+  });
+  const linha=(rot,c,rodape)=>{
+    let h='<tr>'+(rodape?'<th>'+rot+'</th>':'<th>'+rot+'</th>');
+    ETAPAS_TAB.forEach(([k])=>{
+      h+='<td class="'+(c.vn[k]?'':'zero')+'">'+fmtNum(c.vn[k])+'</td>'+
+         '<td class="'+(c.vd[k]?'':'zero')+'">'+fmtNum(c.vd[k])+'</td>';
+    });
+    h+='<td class="conv '+(rodape?'':(c.temEnt?classeComp(c.conv,geral.conv):''))+'">'+
+       (c.temEnt?fmtPct(c.conv):'—')+'</td></tr>';
+    return h;
+  };
+  let corpo='';
+  usados.forEach(m=>{ corpo+=linha(m,celula(lojas,[m]),false); });
+  return '<table><thead>'+
+    '<tr><th class="canal" rowspan="2">Canal</th>'+
+    ETAPAS_TAB.map(e=>'<th colspan="2">'+e[1]+'</th>').join('')+
+    '<th rowspan="2">%conv.</th></tr>'+
+    '<tr class="sub">'+ETAPAS_TAB.map(()=>'<th class="dep">VN</th><th class="dep">VDA</th>').join('')+'</tr>'+
+    '</thead><tbody>'+corpo+'</tbody>'+
+    '<tfoot>'+linha('Total',geral,true)+'</tfoot></table>';
+}
+function desenharGeral(){
+  const lojas=lojasComDado();
+  const alvo=document.getElementById('tabela-geral');
+  if(!lojas.length){
+    alvo.innerHTML='<div class="vazio">Nenhum relatório importado para este recorte</div>';
+    document.getElementById('selo-geral').textContent='sem dado';
+    document.getElementById('dica-geral').innerHTML='';
+    return;
+  }
+  alvo.innerHTML=tabelaCanais(lojas);
+  const c=celula(lojas,CANAIS);
+  document.getElementById('selo-geral').textContent=
+    rotuloAtivo()+' · '+lojas.length+' loja(s) · '+fmtNum(c.total.ent)+' entrantes';
+  document.getElementById('dica-geral').innerHTML=
+    'Entrantes saem da coluna <b>Fluxo Total Dia</b> do relatório, agendados de <b>Cli. Agendados</b>, '+
+    'fluxo da soma de <b>Comp. Agendado</b> com <b>Comp. Não Agendado</b> e vendas de <b>Vendidos</b>. '+
+    'Cada etapa aparece dividida em VN e VDA, e o <b>%conv.</b> é a venda sobre o entrante somando os dois.';
+}
+function desenharLojas(){
+  const alvo=document.getElementById('blocos-lojas');
+  const lojas=lojasComDado();
+  if(!lojas.length){ alvo.innerHTML=''; return; }
+  alvo.innerHTML=lojas.map(n=>{
+    const c=celula([n],CANAIS);
+    return '<div class="bloco loja">'+
+      '<h2><em>'+n+'</em> <span class="selo-estado">'+pracaDe(n)+' · '+fmtNum(c.total.ent)+' entrantes · '+
+        fmtNum(c.total.vd)+' vendas</span>'+
+      '<span class="controles">'+
+        '<button class="acao miudo" data-copiar="loja:'+n+'">Copiar tabela</button>'+
+        '<button class="acao miudo destaque-btn" data-slide="loja:'+n+'">Slide</button>'+
+      '</span></h2>'+
+      '<div class="miolo"><div class="rolagem">'+tabelaCanais([n])+'</div>'+
+      '<span class="recado" id="recado-loja-'+chave(n)+'">Copiado</span></div></div>';
+  }).join('');
+  alvo.querySelectorAll('[data-slide]').forEach(b=>b.addEventListener('click',()=>gerarSlide(b.dataset.slide)));
+  alvo.querySelectorAll('[data-copiar]').forEach(b=>b.addEventListener('click',()=>copiarTabela(b.dataset.copiar)));
+}
+
+/* ============ placar e filtro ============ */
+function desenharPlacar(){
+  const lojas=lojasAtivas();
+  const c=celula(lojas,CANAIS);
+  document.getElementById('placar').innerHTML=
+    '<div><span>Entrantes'+(lojaSel?' · '+lojaSel:(praca?' · '+praca:''))+'</span><strong>'+fmtNum(c.total.ent)+'</strong></div>'+
+    '<div><span>Agendados</span><strong>'+fmtNum(c.total.ag)+'</strong></div>'+
+    '<div><span>Fluxo</span><strong>'+fmtNum(c.total.fl)+'</strong></div>'+
+    '<div><span>Vendas</span><strong class="destaque">'+fmtNum(c.total.vd)+'</strong></div>'+
+    '<div><span>Faturados</span><strong>'+fmtNum(c.total.ft)+'</strong></div>'+
+    '<div><span>VN / VDA</span><strong>'+fmtNum(c.vn.vd)+' / '+fmtNum(c.vd.vd)+'</strong></div>'+
+    '<div><span>%conv.</span><strong>'+fmtPct(c.conv)+'</strong></div>';
+}
+function desenharFiltro(){
+  const el=document.getElementById('filtro'); if(!el) return;
+  const chip=(valor,rot,lojas)=>{
+    const c=celula(lojas,CANAIS);
+    const ativo = valor===null ? (!praca&&!lojaSel) : (praca===valor && !lojaSel);
+    return '<button class="chip'+(ativo?' ativo':'')+(c.total.ent?'':' vazia')+'" data-praca="'+(valor||'')+'">'+rot+
+      '<b>'+fmtNum(c.total.ent)+'</b></button>';
+  };
+  el.innerHTML='<span class="rot">Praça</span>'+chip(null,'Todas',NOMES)+
+    PRACAS.map(p=>chip(p,p,PRACA_LOJAS[p])).join('')+
+    '<span class="rot" style="margin-left:8px">Loja</span>'+
+    '<select data-loja style="width:auto"><option value="">Todas</option>'+
+    NOMES.filter(n=>!praca||pracaDe(n)===praca).map(n=>'<option value="'+n+'"'+(lojaSel===n?' selected':'')+'>'+
+      n+(temDado([n])?'':' (sem dado)')+'</option>').join('')+'</select>';
+  el.querySelectorAll('[data-praca]').forEach(b=>b.addEventListener('click',()=>{
+    praca=b.dataset.praca||null; lojaSel=null; atualizar();
+  }));
+  el.querySelector('[data-loja]').addEventListener('change',e=>{
+    lojaSel=e.target.value||null;
+    if(lojaSel) praca=pracaDe(lojaSel);
+    atualizar();
+  });
+}
+function copiarTabela(alvo){
+  const lojas = alvo==='geral' ? lojasComDado() : [alvo.split(':')[1]];
+  const usados=CANAIS.filter(m=>{
+    if(estado.config.mostrarVazias) return true;
+    const c=celula(lojas,[m]);
+    return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
+  });
+  const cab1=['CANAL'].concat(ETAPAS_TAB.map(e=>e[1].toUpperCase()+'\t')).join('\t')+'\t%CONV.';
+  const cab2=[''].concat(ETAPAS_TAB.map(()=>'VN\tVDA')).join('\t');
+  const linha=(rot,c)=>[rot].concat(ETAPAS_TAB.map(([k])=>c.vn[k]+'\t'+c.vd[k]))
+    .join('\t')+'\t'+(c.temEnt?fmtPct(c.conv):'—');
+  const corpo=usados.map(m=>linha(m,celula(lojas,[m])));
+  const txt=[cab1,cab2].concat(corpo).concat([linha('TOTAL',celula(lojas,CANAIS))]).join('\n');
+  const id = alvo==='geral' ? 'recado-geral' : 'recado-loja-'+chave(alvo.split(':')[1]);
+  navigator.clipboard.writeText(txt).then(()=>recado(id,'Copiado'))
+    .catch(()=>recado(id,'Não deu para copiar','var(--alerta)'));
+}
+
+/* ============ leitura dos relatórios de mergulho ============ */
+/* uma linha por lead: loja em Empresa, canal em Midia, departamento no Vendedor */
+/* Este painel só separa as mídias por departamento: não existe descarte por
+   motivo de conclusão. Nos entrantes o lead sem vendedor entra em VN; nas
+   outras etapas ele fica de fora e é apenas avisado. */
+const FONTES=[
+  {k:'ent', rot:'Entrantes', arq:'Fluxo Total Dia', semVendedorVN:true},
+  {k:'ag',  rot:'Agendados', arq:'Cli. Agendados'},
+  {k:'cAg', rot:'Fluxo · comparecidos agendados', arq:'Comp. Agendado'},
+  {k:'cNao',rot:'Fluxo · comparecidos não agendados', arq:'Comp. Não Agendado'},
+  {k:'vd',  rot:'Vendas e faturados', arq:'Vendas Leads Geely'}];
+const fonteDe=k=>FONTES.find(f=>f.k===k)||FONTES[0];
+/* O departamento vem do TIPO DE EVENTO, coluna E do relatório, e não mais do
+   vendedor. Cada tipo é direcionado no bloco "Tipo de evento e departamento".
+   Tipo sem direcionamento não é contado e aparece como aviso na importação. */
+function departamento(cru){
+  const t=String(cru==null?'':cru).trim();
+  const c=chave(t);
+  if(!c) return {dep:null,rot:'(sem tipo de evento)'};
+  const v=(estado.config.mapaEvento||{})[c];
+  return {dep:(v==='vn'||v==='vd')?v:null, rot:t};
+}
+function separador(texto){
+  const p=texto.split(/\r?\n/)[0]||'';
+  const ps=(p.match(/;/g)||[]).length, pv=(p.match(/,/g)||[]).length, tab=(p.match(/\t/g)||[]).length;
+  if(tab>=ps&&tab>=pv&&tab>0) return '\t';
+  return ps>=pv?';':',';
+}
+function lerCSV(texto){
+  const sep=separador(texto), linhas=[]; let campo='', linha=[], dentro=false;
+  for(let i=0;i<texto.length;i++){
+    const c=texto[i];
+    if(dentro){ if(c==='"'){ if(texto[i+1]==='"'){ campo+='"'; i++; } else dentro=false; } else campo+=c; }
+    else if(c==='"') dentro=true;
+    else if(c===sep){ linha.push(campo); campo=''; }
+    else if(c==='\n'){ linha.push(campo); linhas.push(linha); linha=[]; campo=''; }
+    else if(c!=='\r') campo+=c;
+  }
+  if(campo!==''||linha.length){ linha.push(campo); linhas.push(linha); }
+  return linhas.filter(l=>l.some(x=>String(x).trim()!==''));
+}
+async function arquivoParaAbas(f,erro){
+  const nome=f.name.toLowerCase();
+  if(nome.endsWith('.csv')||nome.endsWith('.txt')){
+    const m=lerCSV(await f.text());
+    return {ordem:['arquivo'],abas:{arquivo:m}};
+  }
+  if(typeof XLSX==='undefined'){
+    erro('A biblioteca de leitura de Excel não carregou. Salve como CSV e anexe de novo.');
+    return null;
+  }
+  const wb=XLSX.read(new Uint8Array(await f.arrayBuffer()),{type:'array'});
+  const abas={};
+  wb.SheetNames.forEach(n=>{ abas[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:null}); });
+  return {ordem:wb.SheetNames.slice(),abas};
+}
+/* aba do mês corrente, tipo SETEMBRO2026 */
+function escolherAba(ordem){
+  const hoje=new Date(), mes=chave(MESES_NOME[hoje.getMonth()]), ano2=String(hoje.getFullYear()).slice(2);
+  return ordem.find(n=>chave(n).indexOf(mes)>=0 && chave(n).indexOf(ano2)>=0)
+    || ordem.find(n=>chave(n).indexOf(mes)>=0) || ordem[0];
+}
+async function arquivoParaMatriz(f,erro){
+  const p=await arquivoParaAbas(f,erro);
+  return p?p.abas[p.ordem[0]]:null;
+}
+function acharCabecalho(matriz){
+  for(let i=0;i<Math.min(matriz.length,15);i++){
+    const l=matriz[i]||[];
+    if(l.some(c=>chave(c)==='midia') && l.some(c=>chave(c)==='tipoevento')) return i;
+  }
+  return 0;
+}
+function ehMergulho(matriz){
+  const l=matriz[acharCabecalho(matriz)]||[];
+  return l.some(c=>chave(c)==='midia') && l.some(c=>chave(c)==='tipoevento');
+}
+function colunasDe(cabecalhos){
+  const achar=alvos=>{
+    for(let i=0;i<cabecalhos.length;i++){ if(alvos.indexOf(chave(cabecalhos[i]))>=0) return i; }
+    return -1;
+  };
+  return {loja:achar(['empresa','loja']), midia:achar(['midia']),
+    evento:achar(['tipoevento']), vendedor:achar(['vendedor']), motivo:achar(['motivoconclusao'])};
+}
+async function receberArquivos(lista,fonte){
+  const alvo=document.getElementById('mapa-midia');
+  const erro=msg=>{ alvo.innerHTML='<div class="avisos"><h3>Não deu para ler</h3><ul><li>'+msg+'</li></ul></div>';
+    selo('arquivo','não consegui ler','ruim'); };
+  try{
+    const arquivos=Array.prototype.slice.call(lista);
+    const itens=[];
+    if(fonte==='vd'){
+      const f=arquivos[0];
+      const p=await arquivoParaAbas(f,erro);
+      if(!p) return;
+      const aba=estado.config.abaVendas && p.ordem.indexOf(estado.config.abaVendas)>=0
+        ? estado.config.abaVendas : escolherAba(p.ordem);
+      if(!ehPlanilhaVendas(p.abas[aba])){
+        erro('O arquivo '+f.name+' não parece ser a planilha de vendas: não achei as colunas <b>LOJA</b>, <b>DATA DA VENDA</b>, <b>NF</b> e <b>MÍDIA</b>.');
+        return;
+      }
+      const antigosV=(bruto&&bruto.itens?bruto.itens:[]).filter(x=>x.fonte!=='vd');
+      bruto={itens:antigosV.concat([{nome:f.name,fonte:'vd',abas:p.abas,ordem:p.ordem,aba,matriz:p.abas[aba],cab:0,colunas:{}}])};
+      selo('vd','aba '+aba,'ok');
+      selo('arquivo',bruto.itens.length+' arquivo(s) pronto(s)','ok');
+      desenharImportacao();
+      return;
+    }
+    for(let i=0;i<arquivos.length;i++){
+      const f=arquivos[i];
+      const matriz=await arquivoParaMatriz(f,erro);
+      if(!matriz) return;
+      if(!matriz.length){ erro('O arquivo '+f.name+' está vazio.'); return; }
+      if(!ehMergulho(matriz)){ erro('O arquivo '+f.name+' não parece ser um relatório de mergulho: não achei as colunas <b>Midia</b> e <b>Tipo Evento</b>.'); return; }
+      const cab=acharCabecalho(matriz);
+      const cabecalhos=(matriz[cab]||[]).map(c=>String(c==null?'':c).trim());
+      itens.push({nome:f.name,fonte,matriz,cab,cabecalhos,colunas:colunasDe(cabecalhos)});
+    }
+    const antigos=(bruto&&bruto.itens?bruto.itens:[]).filter(x=>!itens.some(y=>y.nome===x.nome&&y.fonte===x.fonte));
+    bruto={itens:antigos.concat(itens)};
+    selo(fonte,arquivos.length+' arquivo(s)','ok');
+    selo('arquivo',bruto.itens.length+' arquivo(s) pronto(s)','ok');
+    desenharImportacao();
+  }catch(e){ erro('Falha ao processar: '+e.message); }
+}
+/* conta as linhas por loja, canal e departamento */
+function processarItem(it){
+  const cfg=fonteDe(it.fonte);
+  const res={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, eventos={};
+  let linhas=0, semLoja=0, semDep=0;
+  for(let i=it.cab+1;i<it.matriz.length;i++){
+    const l=it.matriz[i]; if(!l) continue;
+    if(!l.some(x=>String(x==null?'':x).trim()!=='')) continue;
+    linhas++;
+    const loja=acharLoja(l[it.colunas.loja]);
+    if(!loja){
+      const t=String(l[it.colunas.loja]==null?'':l[it.colunas.loja]).trim();
+      if(t) naoRec[t]=(naoRec[t]||0)+1; else semLoja++;
+      continue;
+    }
+    const cru=String(l[it.colunas.midia]==null?'':l[it.colunas.midia]).trim() || 'SEM MIDIA';
+    tipos[cru]=(tipos[cru]||0)+1;
+    const canal=canalDe(cru);
+    if(canal===SEM_CLASSE) naoMapeados[cru]=(naoMapeados[cru]||0)+1;
+    const q=departamento(l[it.colunas.evento]);
+    eventos[q.rot]=(eventos[q.rot]||0)+1;
+    const dep=q.dep;
+    if(!dep){
+      /* sem departamento a linha não entra: vira erro para você resolver */
+      pendentes[q.rot]=(pendentes[q.rot]||0)+1;
+      semDep++;
+      continue;
+    }
+    res[loja]=res[loja]||{};
+    res[loja][dep]=res[loja][dep]||{};
+    res[loja][dep][canal]=(res[loja][dep][canal]||0)+1;
+  }
+  const lojas=Object.keys(res);
+  return {res,lojas,tipos,naoMapeados,naoRec,pendentes,eventos,semDep,linhas,semLoja};
+}
+/* arquivo de uma loja só preserva as outras; arquivo do grupo zera quem não veio */
+function alvosDoArquivo(presentes){
+  const modo=estado.config.lojasFora||'auto';
+  if(modo==='zerar') return NOMES.slice();
+  if(modo==='manter') return presentes.slice();
+  return presentes.length>1 ? NOMES.slice() : presentes.slice();
+}
+/* resumo da planilha de vendas, com seletor da aba do mês */
+function blocoVendas(it,idx,naoMapGeral){
+  const r=processarVendas(it);
+  Object.keys(r.naoMapeados).forEach(k=>naoMapGeral[k]=(naoMapGeral[k]||0)+r.naoMapeados[k]);
+  const mes=r.alvo.mes?(MESES_NOME[r.alvo.mes-1]+' de '+r.alvo.ano):'mês não reconhecido pelo nome da aba';
+  let g='<div class="caixa"><b>Vendas e faturados</b> · '+it.nome+' · aba <b>'+it.aba+'</b> · '+mes+
+    '<br><b>Vendas:</b> '+fmtNum(r.linhas)+' linhas com data = '+fmtNum(r.linhas-r.foraDoMes)+' do mês da aba + '+
+    fmtNum(r.foraDoMes)+' de outros meses, que não contam como venda'+
+    '<br><b>Faturados:</b> toda linha com NF preenchida, de qualquer mês — '+fmtNum(r.faturados)+
+    (r.fatOutroMes?', sendo '+fmtNum(r.fatOutroMes)+' de vendas de meses anteriores':'')+
+    (r.semData?' · '+fmtNum(r.semData)+' linha(s) começadas sem data':'')+
+    '<br><b>Lojas no arquivo:</b> '+(r.lojas.length?r.lojas.join(' · '):'nenhuma')+
+    (Object.keys(r.naoRec).length?'<br><span class="ruim">Loja não reconhecida na coluna LOJA: '+
+      Object.keys(r.naoRec).map(x=>x+' ('+fmtNum(r.naoRec[x])+' vendas)').join(' · ')+
+      '. Inclua no bloco <b>Lojas Geely</b> para ela entrar.</span>':'')+
+    (r.semLoja?'<br><span class="aten">'+fmtNum(r.semLoja)+' venda(s) sem loja preenchida, ignoradas.</span>':'')+
+    '</div>';
+  g+='<div class="grade-mapa"><div><label class="campo">Aba do mês</label><select data-vd="aba" data-i="'+idx+'">'+
+     it.ordem.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'"'+(n===it.aba?' selected':'')+'>'+n+'</option>').join('')+
+     '</select></div></div>';
+  const usados=CANAIS.filter(m=>DEPS.some(d=>(((r.res[ Object.keys(r.res)[0] ]||{})[d.k]||{})[m])));
+  const tot=(dep,canal,campo)=>r.lojas.reduce((a,n)=>a+((((r.res[n]||{})[dep]||{})[canal]||{})[campo]||0),0);
+  const canaisComDado=CANAIS.filter(m=>DEPS.some(d=>tot(d.k,m,'vd')||tot(d.k,m,'ft')));
+  let corpo='';
+  canaisComDado.forEach(m=>{
+    corpo+='<tr><th>'+m+'</th><td>'+fmtNum(tot('vn',m,'vd'))+'</td><td>'+fmtNum(tot('vd',m,'vd'))+'</td>'+
+      '<td class="forte">'+fmtNum(tot('vn',m,'vd')+tot('vd',m,'vd'))+'</td>'+
+      '<td>'+fmtNum(tot('vn',m,'ft'))+'</td><td>'+fmtNum(tot('vd',m,'ft'))+'</td>'+
+      '<td class="forte">'+fmtNum(tot('vn',m,'ft')+tot('vd',m,'ft'))+'</td></tr>';
+  });
+  const soma=(dep,campo)=>canaisComDado.reduce((a,m)=>a+tot(dep,m,campo),0);
+  g+='<div class="rolagem" style="margin-top:12px"><table><thead>'+
+     '<tr><th class="canal" rowspan="2">Canal</th><th colspan="3">Vendas</th><th colspan="3">Faturados</th></tr>'+
+     '<tr class="sub"><th class="dep">VN</th><th class="dep">VDA</th><th class="dep">Total</th>'+
+     '<th class="dep">VN</th><th class="dep">VDA</th><th class="dep">Total</th></tr></thead><tbody>'+corpo+'</tbody>'+
+     '<tfoot><tr><th>Total do arquivo</th><td>'+fmtNum(soma('vn','vd'))+'</td><td>'+fmtNum(soma('vd','vd'))+'</td>'+
+     '<td>'+fmtNum(soma('vn','vd')+soma('vd','vd'))+'</td><td>'+fmtNum(soma('vn','ft'))+'</td>'+
+     '<td>'+fmtNum(soma('vd','ft'))+'</td><td>'+fmtNum(soma('vn','ft')+soma('vd','ft'))+'</td></tr></tfoot></table></div>';
+  g+='<div class="caixa"><b>Mídias, com o canal de destino:</b><br>'+
+     Object.keys(r.tipos).sort((a,b)=>r.tipos[b]-r.tipos[a])
+       .map(t=>t+' → <b>'+canalDe(t)+'</b> ('+fmtNum(r.tipos[t])+')').join(' · ')+
+     '<br><br><b>PF/PJ, com o departamento:</b> '+Object.keys(r.deps).sort((a,b)=>r.deps[b]-r.deps[a])
+       .map(t=>{const q=depDaVenda(t); return t+' → <b>'+(q.dep?(q.dep==='vd'?'VDA':'VN'):'não definido')+'</b> ('+fmtNum(r.deps[t])+')';}).join(' · ')+
+     '</div>';
+  g+=gradeCanalPendente(r.tipos);
+  if(r.semDep) g+='<div class="avisos"><h3>'+fmtNum(r.semDep)+' venda(s) sem departamento — ficam fora da conta</h3>'+
+    '<ul>'+Object.keys(r.pendentes).map(p=>'<li><b>'+p+'</b> · '+fmtNum(r.pendentes[p])+'</li>').join('')+'</ul>'+
+    '<p class="dica" style="margin:8px 0 0">Defina o departamento desses valores no bloco <b>PF/PJ e departamento</b>, mais abaixo.</p></div>';
+  return g;
+}
+function desenharImportacao(){
+  const alvo=document.getElementById('mapa-midia');
+  if(!bruto||!bruto.itens.length){ alvo.innerHTML=''; return; }
+  let g='';
+  const naoMapGeral={};
+  bruto.itens.forEach((it,idx)=>{
+    if(it.fonte==='vd'){ g+=blocoVendas(it,idx,naoMapGeral); return; }
+    const cfg=fonteDe(it.fonte), r=processarItem(it);
+    Object.keys(r.naoMapeados).forEach(k=>naoMapGeral[k]=(naoMapGeral[k]||0)+r.naoMapeados[k]);
+    const total=(dep,canal)=>r.lojas.reduce((a,n)=>a+(((r.res[n]||{})[dep]||{})[canal]||0),0);
+    const usados=CANAIS.filter(m=>total('vn',m)||total('vd',m));
+    g+='<div class="caixa"><b>'+cfg.rot+'</b> · '+cfg.arq+' · '+it.nome+' · '+r.linhas+' linhas · cabeçalho na linha '+(it.cab+1)+
+       '<br><b>Fecha assim:</b> '+fmtNum(r.linhas)+' linhas = '+fmtNum(r.linhas-r.semDep-r.semLoja)+' contadas'+
+       (r.semDep?' + '+fmtNum(r.semDep)+' sem departamento':'')+
+       (r.semLoja?' + '+fmtNum(r.semLoja)+' sem loja':'')+
+
+       '<br><b>Lojas no arquivo:</b> '+(r.lojas.length?r.lojas.join(' · '):'nenhuma')+
+       (function(){
+         const zeradas=alvosDoArquivo(r.lojas).filter(n=>r.lojas.indexOf(n)<0);
+         return zeradas.length?'<br><span class="aten">Tratado como exportação do grupo: '+zeradas.join(' · ')+' vão a zero nesta etapa.</span>':'';
+       })()+
+       (Object.keys(r.naoRec).length?'<br><span class="ruim">Loja não reconhecida: '+Object.keys(r.naoRec).join(' · ')+'</span>':'')+
+       '</div>';
+    let corpo='';
+    usados.forEach(m=>{
+      corpo+='<tr><th>'+m+'</th><td>'+fmtNum(total('vn',m))+'</td><td>'+fmtNum(total('vd',m))+'</td>'+
+        '<td class="forte">'+fmtNum(total('vn',m)+total('vd',m))+'</td></tr>';
+    });
+    const tvn=usados.reduce((a,m)=>a+total('vn',m),0), tvd=usados.reduce((a,m)=>a+total('vd',m),0);
+    g+='<div class="rolagem" style="margin-top:12px"><table><thead><tr><th>Canal</th><th>VN</th><th>VDA</th><th>Total</th></tr></thead>'+
+       '<tbody>'+corpo+'</tbody><tfoot><tr><th>Total do arquivo</th><td>'+fmtNum(tvn)+'</td><td>'+fmtNum(tvd)+'</td>'+
+       '<td>'+fmtNum(tvn+tvd)+'</td></tr></tfoot></table></div>';
+    const rotDep=t=>{ const q=departamento(t); return q.dep?(q.dep==='vd'?'VDA':'VN'):'não definido'; };
+    g+='<div class="caixa"><b>Tipos de mídia lidos, com o canal de destino:</b><br>'+
+       Object.keys(r.tipos).sort((a,b)=>r.tipos[b]-r.tipos[a])
+         .map(t=>t+' → <b>'+canalDe(t)+'</b> ('+fmtNum(r.tipos[t])+')').join(' · ')+
+       '<br><br><b>Tipos de evento, com o departamento:</b><br>'+
+       Object.keys(r.eventos).sort((a,b)=>r.eventos[b]-r.eventos[a])
+         .map(t=>t+' → <b>'+rotDep(t)+'</b> ('+fmtNum(r.eventos[t])+')').join(' · ')+'</div>';
+    g+=gradeCanalPendente(r.tipos);
+    const pend=Object.keys(r.pendentes).sort((a,b)=>r.pendentes[b]-r.pendentes[a]);
+    if(pend.length){
+      g+='<div class="avisos"><h3>'+fmtNum(r.semDep)+' linha(s) sem departamento — ficam fora da conta</h3>'+
+        '<ul>'+pend.map(p=>'<li><b>'+p+'</b> · '+fmtNum(r.pendentes[p])+' linha(s)</li>').join('')+'</ul>'+
+        '<p class="dica" style="margin:8px 0 0">O vendedor não tem <code>[ VN ]</code> nem <code>[ VD ]</code> na frente do nome, '+
+        'então a linha não pertence a nenhum departamento e não pode ser contada. Corrija na planilha de origem e anexe de novo.'+
+'</p>'+
+        '</div>';
+    }
+  });
+
+  g+='<div class="barra"><button class="acao principal" id="btn-aplicar">Aplicar no painel</button>'+
+     '<button class="acao miudo" id="btn-descartar">Descartar</button>'+
+     '<span class="recado" id="recado-arquivo">Aplicado</span></div>';
+  alvo.innerHTML=g;
+
+  ligarSelectsCanal(alvo);
+  alvo.querySelectorAll('[data-vd="aba"]').forEach(el=>{
+    el.addEventListener('change',async()=>{
+      const it=bruto.itens[+el.dataset.i];
+      it.aba=el.value; it.matriz=it.abas[it.aba];
+      estado.config.abaVendas=it.aba;
+      await guardar('config',estado.config);
+      desenharImportacao();
+    });
+  });
+  alvo.querySelectorAll('[data-imp]').forEach(el=>{
+    el.addEventListener('change',async()=>{
+      const it=bruto.itens[+el.dataset.i];
+      if(el.dataset.imp==='motivos'){
+        estado.config.filtros=estado.config.filtros||{};
+        estado.config.filtros[it.fonte]=el.value==='1';
+      }else if(el.dataset.imp==='lista'){
+        estado.config.motivosFora=el.value.split(';').map(s=>s.trim()).filter(Boolean);
+      }
+      await guardar('config',estado.config);
+      desenharImportacao();
+    });
+  });
+  document.getElementById('btn-aplicar').addEventListener('click',aplicar);
+  document.getElementById('btn-descartar').addEventListener('click',()=>{
+    bruto=null; desenharImportacao();
+    selo('arquivo','nenhum arquivo carregado');
+    FONTES.forEach(f=>selo(f.k,'nenhum arquivo'));
+  });
+}
+async function aplicar(){
+  if(!bruto) return;
+  const fora=bruto.itens.reduce((a,it)=>a+(it.fonte==='vd'?processarVendas(it).semDep:processarItem(it).semDep),0);
+  if(fora && !confirm(fmtNum(fora)+' linha(s) ficam fora porque o tipo de evento não tem departamento definido. '+
+    'Aplicar assim mesmo? Você pode definir cada tipo no bloco abaixo, ou corrigir a planilha e anexar de novo.')) return;
+  await gravarImportacao(true);
+}
+/* grava no painel o que está nos arquivos anexados. com historico=false serve para
+   reagrupar depois de mexer no mapa, sem poluir o histórico nem pedir confirmação. */
+async function gravarImportacao(historicar){
+  if(!bruto) return;
+  const mantidas=[];
+  bruto.itens.forEach(it=>{
+    if(it.fonte==='vd'){
+      const rv=processarVendas(it);
+      const alvosV=alvosDoArquivo(rv.lojas);
+      alvosV.forEach(n=>DEPS.forEach(d=>{
+        ['vd','ft'].forEach(campo=>{
+          if(travado(n,d.k,campo)){ mantidas.push(n+' · '+d.rot+' · '+campo); return; }
+          CANAIS.forEach(m=>{ estado.dados[n][d.k][m][campo]=((((rv.res[n]||{})[d.k]||{})[m])||{})[campo]||0; });
+        });
+      }));
+      estado.fontes.vd={arquivo:it.nome,quando:new Date().toISOString(),linhas:rv.linhas-rv.foraDoMes,
+        lojas:alvosV,etapa:'Vendas e faturados · '+it.aba};
+      if(historicar) historico.push({quando:new Date().toISOString(),arquivo:it.nome+' · '+it.aba,
+        resumo:'Vendas e faturados · vendas '+fmtNum(rv.linhas-rv.foraDoMes-rv.semDep)+' · faturados '+fmtNum(rv.faturados)+
+          (rv.fatOutroMes?' (sendo '+fmtNum(rv.fatOutroMes)+' de meses anteriores)':'')+' · '+alvosV.length+' loja(s)'});
+      return;
+    }
+    const cfg=fonteDe(it.fonte), r=processarItem(it);
+    const alvos=alvosDoArquivo(r.lojas);
+    const campo=CAMPO_DA_FONTE[it.fonte];
+    alvos.forEach(n=>DEPS.forEach(d=>{
+      /* etapa lançada à mão não é sobrescrita pela importação */
+      if(travado(n,d.k,campo)){ mantidas.push(n+' · '+d.rot+' · '+campo); return; }
+      CANAIS.forEach(m=>{ estado.dados[n][d.k][m][it.fonte]=(((r.res[n]||{})[d.k]||{})[m])||0; });
+    }));
+    estado.fontes[it.fonte]={arquivo:it.nome,quando:new Date().toISOString(),
+      linhas:r.linhas,lojas:alvos,etapa:cfg.rot};
+    const t=dep=>alvos.reduce((a,n)=>a+CANAIS.reduce((b,m)=>b+((((r.res[n]||{})[dep]||{})[m])||0),0),0);
+    if(historicar) historico.push({quando:new Date().toISOString(),arquivo:it.nome,
+      resumo:cfg.rot+' · VN '+fmtNum(t('vn'))+' · VDA '+fmtNum(t('vd'))+
+        (r.semDep?' · '+r.semDep+' sem departamento':'')+' · '+alvos.length+' loja(s)'});
+  });
+  await salvarTudo();
+  atualizar();
+  desenharImportacao();
+  recado('recado-arquivo', mantidas.length?'Aplicado · lançamentos manuais mantidos':'Aplicado');
+  if(historicar && mantidas.length) alert('Estes números continuam com o que você lançou à mão e não foram atualizados:\n'+
+    mantidas.filter((v,i,a)=>a.indexOf(v)===i).join('\n'));
+}
+
+/* ============ lançamento manual de todas as etapas ============ */
+/* campo 'fl' é a soma dos dois comparecidos: digitado à mão, vai todo em flAg */
+const MANUAL_CAMPOS=[{k:'ent',rot:'Entrantes'},{k:'ag',rot:'Agendados'},{k:'fl',rot:'Fluxo'},
+  {k:'vd',rot:'Vendas'},{k:'ft',rot:'Faturados'}];
+const CAMPO_DA_FONTE={ent:'ent',ag:'ag',cAg:'fl',cNao:'fl',vd:'vd',ft:'ft'};
+let lojaManual=null;
+function valorManual(loja,dep,canal,campo){
+  const r=(((estado.dados[loja]||{})[dep]||{})[canal])||{};
+  if(campo==='fl') return (+r.cAg||0)+(+r.cNao||0);
+  return +r[campo]||0;
+}
+function gravarManual(loja,dep,canal,campo,v){
+  const r=estado.dados[loja][dep][canal];
+  if(campo==='fl'){ r.cAg=v; r.cNao=0; }
+  else r[campo]=v;
+  estado.manual=estado.manual||{};
+  estado.manual[loja+'|'+dep+'|'+campo]=true;
+}
+const travado=(loja,dep,campo)=>!!((estado.manual||{})[loja+'|'+dep+'|'+campo]);
+function desenharManual(){
+  const sel=document.getElementById('sel-loja-manual');
+  if(!lojaManual||NOMES.indexOf(lojaManual)<0) lojaManual=(lojasComDado()[0]||NOMES[0]);
+  sel.innerHTML=NOMES.map(n=>'<option value="'+n+'"'+(lojaManual===n?' selected':'')+'>'+
+    n+(temDado([n])?'':' (sem relatório)')+'</option>').join('');
+  const n=lojaManual;
+  let c='';
+  CANAIS.forEach(m=>{
+    c+='<tr><th>'+m+'</th>';
+    MANUAL_CAMPOS.forEach(cp=>DEPS.forEach(d=>{
+      c+='<td><input type="number" min="0" step="1" data-dep="'+d.k+'" data-campo="'+cp.k+'" data-canal="'+m+'" value="'+
+        valorManual(n,d.k,m,cp.k)+'"></td>';
+    }));
+    c+='</tr>';
+  });
+  const tot=(dep,campo)=>CANAIS.reduce((a,m)=>a+valorManual(n,dep,m,campo),0);
+  document.getElementById('tabela-manual').innerHTML=
+    '<table class="editavel"><thead>'+
+    '<tr><th class="canal" rowspan="2">Canal</th>'+MANUAL_CAMPOS.map(cp=>'<th colspan="2">'+cp.rot+'</th>').join('')+'</tr>'+
+    '<tr class="sub">'+MANUAL_CAMPOS.map(()=>'<th class="dep">VN</th><th class="dep">VDA</th>').join('')+'</tr>'+
+    '</thead><tbody>'+c+'</tbody>'+
+    '<tfoot><tr><th>Total</th>'+MANUAL_CAMPOS.map(cp=>
+      '<td>'+fmtNum(tot('vn',cp.k))+'</td><td>'+fmtNum(tot('vd',cp.k))+'</td>').join('')+'</tr></tfoot></table>';
+  document.querySelectorAll('#tabela-manual input').forEach(inp=>{
+    inp.addEventListener('change',async()=>{
+      const v=Math.max(0,Math.round(+inp.value||0));
+      inp.value=v;
+      gravarManual(lojaManual,inp.dataset.dep,inp.dataset.canal,inp.dataset.campo,v);
+      inp.classList.add('editado');
+      await salvarTudo();
+      atualizar();
+      recado('recado-manual','Salvo');
+    });
+  });
+  const marcas=[];
+  MANUAL_CAMPOS.forEach(cp=>DEPS.forEach(d=>{ if(travado(lojaManual,d.k,cp.k)) marcas.push(cp.rot+' '+d.rot); }));
+  document.getElementById('caixa-manual').innerHTML = marcas.length
+    ? '<span class="ok">No controle do lançamento manual em '+lojaManual+':</span> <b>'+marcas.join('</b>, <b>')+'</b>. '+
+      'A importação atualiza o resto e não mexe nesses números. Use <b>Voltar a usar o relatório</b> para liberar.'
+    : 'Nada lançado à mão em '+lojaManual+'. Qualquer número que você digitar aqui passa a mandar sobre o relatório, '+
+      'até você liberar de novo.';
+  document.getElementById('selo-manual').textContent=
+    Object.keys(estado.manual||{}).length+' número(s) no controle do manual';
+}
+
+/* ============ planilha de vendas e faturados ============ */
+/* Blocos por loja, uma aba por mês. Só entram as linhas cuja DATA DA VENDA cai
+   dentro do mês da aba, e faturado é a venda do mês que já tem NF preenchida. */
+const MESES_NOME=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function depDaVenda(cru){
+  const t=String(cru==null?'':cru).trim(), c=chave(t);
+  if(!c) return {dep:null,rot:'(em branco)'};
+  const v=(estado.config.mapaDepVenda||{})[c];
+  return {dep:(v==='vn'||v==='vd')?v:null, rot:t};
+}
+/* mês e ano a partir do nome da aba: SETEMBRO2026, AGOSTO26 */
+function mesDaAba(nome){
+  const c=chave(nome);
+  let mes=-1;
+  MESES_NOME.forEach((m,i)=>{ if(c.indexOf(chave(m))>=0) mes=i+1; });
+  if(mes<0) return null;
+  const a=c.match(/(\d{2,4})$/);
+  if(!a) return null;
+  let ano=+a[1]; if(ano<100) ano+=2000;
+  return {mes,ano};
+}
+function dataDaVenda(v){
+  if(v==null||v==='') return null;
+  if(v instanceof Date && !isNaN(v)) return {ano:v.getFullYear(),mes:v.getMonth()+1};
+  if(typeof v==='number' && isFinite(v) && v>20000 && v<80000){
+    const d=new Date(Date.UTC(1899,11,30)+v*86400000);
+    return {ano:d.getUTCFullYear(),mes:d.getUTCMonth()+1};
+  }
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return {ano:+m[1],mes:+m[2]};
+  m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){
+    let ano=+m[3]; if(ano<100) ano+=2000;
+    const p=+m[1], q=+m[2];
+    /* dd/mm por padrão; se o primeiro passa de 12 não há dúvida */
+    return {ano:ano, mes:(p>12?q:q)};
+  }
+  return null;
+}
+function linhasTitulo(matriz){
+  const t=[];
+  (matriz||[]).forEach((l,i)=>{ if(l&&l.some(c=>chave(c)==='datadavenda')) t.push(i); });
+  return t;
+}
+function ehPlanilhaVendas(matriz){
+  const t=linhasTitulo(matriz);
+  if(!t.length) return false;
+  const l=matriz[t[0]]||[];
+  return l.some(c=>chave(c)==='midia') && l.some(c=>chave(c)==='nf');
+}
+/* a aba do mês corrente, aceitando SETEMBRO2026 e SETEMBRO/2026 */
+function processarVendas(it){
+  const alvo=mesDaAba(it.aba)||{mes:0,ano:0};
+  const titulos=linhasTitulo(it.matriz);
+  const res={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, deps={}, lojasVistas=[], blocoSemLoja={};
+  let linhas=0, foraDoMes=0, fatOutroMes=0, semData=0, semDep=0, semLoja=0, faturados=0;
+  titulos.forEach((ini,j)=>{
+    const fim = j+1<titulos.length ? titulos[j+1] : it.matriz.length;
+    const cab=it.matriz[ini]||[];
+    const idx=alvos=>{ for(let i=0;i<cab.length;i++){ if(alvos.indexOf(chave(cab[i]))>=0) return i; } return -1; };
+    const cLoja=idx(['loja','empresa']), cData=idx(['datadavenda']), cNF=idx(['nf']),
+          cMidia=idx(['midia']), cDep=idx(['pfvd','pfpj','departamento']);
+    /* abas antigas não têm coluna LOJA: nelas o nome está no título do bloco */
+    let lojaDoBloco=null;
+    if(cLoja<0){
+      for(let i=0;i<cab.length;i++){
+        const t=String(cab[i]==null?'':cab[i]).trim();
+        if(!t||chave(t)==='datadavenda') continue;
+        const achou=acharLoja(t);
+        if(achou){ lojaDoBloco=achou; break; }
+        if(!blocoSemLoja[t] && chave(t).length>2 && ['nf','midia','evento','cliente','telefone','modelo','vendedor','status','pfpj','pfvd'].indexOf(chave(t))<0)
+          blocoSemLoja[t]=0;
+      }
+    }
+    for(let i=ini+1;i<fim;i++){
+      const l=it.matriz[i]; if(!l) continue;
+      const d=dataDaVenda(l[cData]);
+      if(!d){ if(l.some((c,ci)=>ci>1&&String(c==null?'':c).trim()!=='')) semData++; continue; }
+      linhas++;
+      const noMes=(d.mes===alvo.mes&&d.ano===alvo.ano);
+      const temNF=cNF>=0 && String(l[cNF]==null?'':l[cNF]).trim()!=='';
+      /* venda é só do mês da aba; faturado é toda linha com NF, de qualquer mês */
+      if(!noMes){ foraDoMes++; if(!temNF) continue; fatOutroMes++; }
+      /* a loja vem da coluna LOJA, uma por linha */
+      const cruLoja=cLoja>=0?l[cLoja]:'';
+      const loja=cLoja>=0?acharLoja(cruLoja):lojaDoBloco;
+      if(!loja){
+        const t=cLoja>=0?String(cruLoja==null?'':cruLoja).trim():'';
+        if(t) naoRec[t]=(naoRec[t]||0)+1;
+        else if(cLoja<0){ Object.keys(blocoSemLoja).forEach(k=>blocoSemLoja[k]++); semLoja++; }
+        else semLoja++;
+        continue;
+      }
+      if(lojasVistas.indexOf(loja)<0) lojasVistas.push(loja);
+      const cru=String(l[cMidia]==null?'':l[cMidia]).trim() || 'SEM MIDIA';
+      tipos[cru]=(tipos[cru]||0)+1;
+      const canal=canalDe(cru);
+      if(canal===SEM_CLASSE) naoMapeados[cru]=(naoMapeados[cru]||0)+1;
+      const q=depDaVenda(cDep>=0?l[cDep]:'');
+      deps[q.rot]=(deps[q.rot]||0)+1;
+      if(!q.dep){ pendentes[q.rot]=(pendentes[q.rot]||0)+1; semDep++; continue; }
+      res[loja]=res[loja]||{};
+      res[loja][q.dep]=res[loja][q.dep]||{};
+      res[loja][q.dep][canal]=res[loja][q.dep][canal]||{vd:0,ft:0};
+      if(noMes) res[loja][q.dep][canal].vd++;
+      if(temNF){ res[loja][q.dep][canal].ft++; faturados++; }
+    }
+  });
+  Object.keys(blocoSemLoja).forEach(k=>{ if(blocoSemLoja[k]) naoRec[k]=(naoRec[k]||0)+blocoSemLoja[k]; });
+  return {res,lojas:lojasVistas,tipos,naoMapeados,naoRec,pendentes,deps,
+    linhas,foraDoMes,fatOutroMes,semData,semDep,semLoja,faturados,alvo};
+}
+
+/* ============ vendas pelo Google Sheets ============ */
+function urlCSV(link,aba){
+  const l=(link||'').trim();
+  if(!l) throw new Error('Cole o link da planilha.');
+  if(/\/pub/.test(l)) return l+(l.indexOf('output=csv')>=0?'':(l.indexOf('?')>=0?'&':'?')+'output=csv');
+  const id=(l.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)||[])[1];
+  if(!id) throw new Error('Não reconheci o endereço. Use o link que o Google gera em Compartilhar.');
+  const base='https://docs.google.com/spreadsheets/d/'+id;
+  const nome=(aba||'').trim();
+  if(nome) return base+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(nome);
+  const gid=(l.match(/[#&?]gid=(\d+)/)||[])[1];
+  return gid ? base+'/export?format=csv&gid='+gid : base+'/gviz/tq?tqx=out:csv';
+}
+function caixaGoogle(html,classe){
+  const el=document.getElementById('caixa-google');
+  el.innerHTML = classe ? '<span class="'+classe+'">'+html+'</span>' : html;
+}
+async function lerVendasGoogle(){
+  const link=document.getElementById('link-vendas').value.trim();
+  const aba=document.getElementById('aba-google').value.trim();
+  estado.config.linkVendas=link; estado.config.abaVendas=aba;
+  await guardar('config',estado.config);
+  try{
+    selo('google','lendo a planilha…');
+    const r=await fetch(urlCSV(link,aba),{redirect:'follow'});
+    if(!r.ok) throw new Error('o Google respondeu '+r.status+'. Confira se a planilha está aberta para leitura.');
+    const texto=await r.text();
+    if(/^\s*</.test(texto)) throw new Error('veio uma página de login em vez dos dados. Deixe a planilha como "qualquer pessoa com o link".');
+    const matriz=lerCSV(texto);
+    if(!ehPlanilhaVendas(matriz)) throw new Error('não achei as colunas LOJA, DATA DA VENDA, NF e MÍDIA nessa aba.');
+    const antigos=(bruto&&bruto.itens?bruto.itens:[]).filter(x=>x.fonte!=='vd');
+    bruto={itens:antigos.concat([{nome:'planilha do Google',fonte:'vd',abas:{},ordem:[aba||'aba única'],
+      aba:aba||'aba única',matriz,cab:0,colunas:{}}])};
+    registrarTipos(); registrarDepVenda();
+    await guardar('config',estado.config);
+    selo('google','planilha lida · confira abaixo','ok');
+    caixaGoogle('Lidas <b>'+fmtNum(matriz.length)+'</b> linhas da aba <b>'+(aba||'única')+'</b>. Confira o resumo no bloco de importação e clique em <b>Aplicar no painel</b>.','ok');
+    desenharImportacao();
+    recado('recado-google','Planilha lida');
+  }catch(e){
+    selo('google','não consegui ler','ruim');
+    caixaGoogle('Não deu para ler: '+e.message+
+      '<br>Se a mensagem falar de rede ou CORS, o navegador bloqueou por o painel estar aberto como arquivo local. '+
+      'Nesse caso use o anexo do arquivo, ou hospede o painel.','ruim');
+    recado('recado-google','Falhou','var(--alerta)');
+  }
+}
+
+/* ============ backup no Google Drive ============ */
+function caixaDrive(html,classe){
+  const el=document.getElementById('caixa-drive');
+  el.innerHTML = classe ? '<span class="'+classe+'">'+html+'</span>' : html;
+}
+function pacoteBackup(){
+  return {versao:3,painel:'midia-geely',gerado:new Date().toISOString(),
+    config:estado.config,dados:estado.dados,manual:estado.manual,fontes:estado.fontes,historico};
+}
+async function aplicarPacote(o){
+  if(!o||!o.dados) throw new Error('backup sem dados');
+  estado.config=Object.assign({},PADRAO.config,o.config||{});
+  aplicarLojas(estado.config.lojas);
+  estado.dados=normalizar(o.dados);
+  estado.manual=(o.manual&&typeof o.manual==='object')?o.manual:{};
+  estado.fontes=o.fontes||{};
+  historico=Array.isArray(o.historico)?o.historico:[];
+  await salvarTudo(true);
+  atualizadoEm=o.gerado||new Date().toISOString();
+  await guardar('atualizado',atualizadoEm);
+  montarAjustes(); atualizar();
+}
+async function subirDrive(){
+  const url=(estado.config.urlDrive||'').trim();
+  if(!url){ caixaDrive('Cole o endereço do app de backup primeiro.','ruim'); return; }
+  try{
+    selo('drive','enviando…');
+    /* text/plain evita o preflight, que o Apps Script não responde */
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({acao:'salvar',pacote:pacoteBackup()})});
+    const o=await r.json();
+    if(!o.ok) throw new Error(o.erro||'o app recusou o envio');
+    estado.config.driveEm=new Date().toISOString();
+    await guardar('config',estado.config);
+    selo('drive','último envio '+dataBR(estado.config.driveEm),'ok');
+    caixaDrive('Backup enviado como <b>'+o.arquivo+'</b>.'+(o.apagados?' '+o.apagados+' backup(s) antigo(s) removido(s).':''),'ok');
+    recado('recado-drive','Enviado');
+  }catch(e){
+    selo('drive','falhou','ruim');
+    caixaDrive('Não deu para enviar: '+e.message+'<br>Confira se o app foi publicado com acesso para <b>qualquer pessoa</b>.','ruim');
+  }
+}
+async function baixarDrive(silencioso){
+  const url=(estado.config.urlDrive||'').trim();
+  if(!url){ if(!silencioso) caixaDrive('Cole o endereço do app de backup primeiro.','ruim'); return; }
+  try{
+    if(!silencioso) selo('drive','buscando…');
+    const r=await fetch(url+(url.indexOf('?')>=0?'&':'?')+'acao=ultimo',{redirect:'follow'});
+    const o=await r.json();
+    if(!o.ok) throw new Error(o.erro||'nada encontrado na pasta');
+    if(!silencioso && !confirm('Carregar o backup de '+dataBR(o.quando)+'? O que está neste navegador é substituído.')) return;
+    await aplicarPacote(o.pacote||o.conteudo);
+    selo('drive','carregado de '+dataBR(o.quando),'ok');
+    caixaDrive('Painel carregado a partir de <b>'+o.arquivo+'</b>, de '+dataBR(o.quando)+'.','ok');
+    recado('recado-drive','Carregado');
+  }catch(e){
+    if(silencioso) return;
+    selo('drive','falhou','ruim');
+    caixaDrive('Não deu para carregar: '+e.message,'ruim');
+  }
+}
+async function testarDrive(){
+  const url=(estado.config.urlDrive||'').trim();
+  if(!url){ caixaDrive('Cole o endereço do app de backup primeiro.','ruim'); return; }
+  try{
+    const r=await fetch(url+(url.indexOf('?')>=0?'&':'?')+'acao=teste',{redirect:'follow'});
+    const o=await r.json();
+    caixaDrive(o.ok?('Conexão certa. Pasta <b>'+(o.pasta||'?')+'</b> com <b>'+fmtNum(o.arquivos||0)+'</b> backup(s).')
+      :('O app respondeu, mas com erro: '+(o.erro||'')),o.ok?'ok':'ruim');
+  }catch(e){
+    caixaDrive('Não consegui falar com o app: '+e.message+
+      '<br>Causas comuns: o app não foi publicado como <b>qualquer pessoa</b>, ou o navegador bloqueou por o painel estar aberto como arquivo local.','ruim');
+  }
+}
+
+/* ============ direcionar canal sem sair da importação ============ */
+/* os tipos que caíram em OUTROS ganham um seletor ali mesmo, na caixa do arquivo */
+function gradeCanalPendente(tipos){
+  const pendentes=Object.keys(tipos||{}).filter(t=>canalDe(t)===SEM_CLASSE)
+    .sort((a,b)=>tipos[b]-tipos[a]);
+  if(!pendentes.length) return '';
+  return '<div class="avisos"><h3>'+pendentes.length+' tipo(s) de mídia em '+SEM_CLASSE+' — destine o canal</h3>'+
+    '<div class="grade-mapa">'+pendentes.map(t=>
+      '<div><label class="campo">'+t+' · '+fmtNum(tipos[t])+' linha(s)</label>'+
+      '<select data-desc="'+chaveMidia(t).replace(/"/g,'&quot;')+'">'+
+      CANAIS.map(m=>'<option value="'+m+'"'+(m===SEM_CLASSE?' selected':'')+'>'+m+'</option>').join('')+
+      '</select></div>').join('')+'</div>'+
+    '<p class="dica" style="margin:8px 0 0">Escolher aqui já reagrupa o painel e grava no bloco <b>Tipo da mídia e canal</b>.</p></div>';
+}
+async function mudarCanal(k,valor){
+  estado.config.mapaMidia[k]=valor;
+  await guardar('config',estado.config);
+  if(bruto){ await gravarImportacao(false); desenharImportacao(); }
+  else { atualizar(); }
+  desenharMapaMidias();
+}
+function ligarSelectsCanal(alvo){
+  alvo.querySelectorAll('[data-desc]').forEach(el=>{
+    el.addEventListener('change',()=>mudarCanal(el.dataset.desc,el.value));
+  });
+}
+
+/* ============ mapa de PF/PJ ============ */
+function desenharMapaDepVenda(){
+  const mapa=estado.config.mapaDepVenda||{}, rot=estado.config.rotulosDepVenda||{};
+  const chaves=Object.keys(mapa).sort((a,b)=>String(rot[a]||a).localeCompare(String(rot[b]||b),'pt-BR'));
+  let c='';
+  chaves.forEach(k=>{
+    const v=mapa[k];
+    c+='<tr><th>'+(rot[k]||k)+'</th><td><select data-dv="'+k+'">'+
+      '<option value=""'+(v==='vn'||v==='vd'?'':' selected')+'>— não definido —</option>'+
+      '<option value="vn"'+(v==='vn'?' selected':'')+'>VN</option>'+
+      '<option value="vd"'+(v==='vd'?' selected':'')+'>VDA</option></select></td></tr>';
+  });
+  document.getElementById('tabela-depvenda').innerHTML=
+    '<table><thead><tr><th>PF/PJ</th><th>Departamento</th></tr></thead><tbody>'+c+'</tbody></table>';
+  document.querySelectorAll('[data-dv]').forEach(el=>el.addEventListener('change',async()=>{
+    if(el.value) estado.config.mapaDepVenda[el.dataset.dv]=el.value;
+    else delete estado.config.mapaDepVenda[el.dataset.dv];
+    await guardar('config',estado.config);
+    if(bruto){ await gravarImportacao(false); desenharImportacao(); }
+    else { desenharMapaDepVenda(); atualizar(); }
+  }));
+  const sem=chaves.filter(k=>mapa[k]!=='vn'&&mapa[k]!=='vd').length;
+  document.getElementById('selo-depvenda').textContent=chaves.length+' valores'+(sem?' · '+sem+' sem departamento':'');
+}
+function registrarDepVenda(){
+  if(!bruto) return false;
+  let novo=false;
+  estado.config.mapaDepVenda=estado.config.mapaDepVenda||{};
+  estado.config.rotulosDepVenda=estado.config.rotulosDepVenda||{};
+  bruto.itens.filter(it=>it.fonte==='vd').forEach(it=>{
+    const r=processarVendas(it);
+    Object.keys(r.deps).forEach(t=>{
+      const k=chave(t);
+      if(!k||(k in estado.config.mapaDepVenda)) return;
+      estado.config.mapaDepVenda[k]=''; estado.config.rotulosDepVenda[k]=t; novo=true;
+    });
+  });
+  return novo;
+}
+
+/* ============ mapa de tipos de evento ============ */
+function desenharMapaEventos(){
+  const mapa=estado.config.mapaEvento||{}, rot=estado.config.rotulosEvento||{};
+  const chaves=Object.keys(mapa).sort((a,b)=>String(rot[a]||a).localeCompare(String(rot[b]||b),'pt-BR'));
+  let c='';
+  chaves.forEach(k=>{
+    const v=mapa[k];
+    c+='<tr><th>'+(rot[k]||k)+'</th><td><select data-ev="'+k+'">'+
+      '<option value=""'+(v==='vn'||v==='vd'?'':' selected')+'>— não definido —</option>'+
+      '<option value="vn"'+(v==='vn'?' selected':'')+'>VN</option>'+
+      '<option value="vd"'+(v==='vd'?' selected':'')+'>VDA</option>'+
+      '</select></td></tr>';
+  });
+  document.getElementById('tabela-evento').innerHTML=
+    '<table><thead><tr><th>Tipo de evento</th><th>Departamento</th></tr></thead><tbody>'+c+'</tbody></table>';
+  document.querySelectorAll('[data-ev]').forEach(el=>el.addEventListener('change',async()=>{
+    if(el.value) estado.config.mapaEvento[el.dataset.ev]=el.value;
+    else delete estado.config.mapaEvento[el.dataset.ev];
+    await guardar('config',estado.config);
+    if(bruto){
+      await gravarImportacao(false);
+      desenharImportacao();
+      recado('recado-evento','Salvo e recontado no painel');
+    }else{
+      desenharMapaEventos(); atualizar();
+      recado('recado-evento','Salvo · anexe o relatório de novo para recontar','var(--atencao)');
+    }
+  }));
+  const sem=chaves.filter(k=>mapa[k]!=='vn'&&mapa[k]!=='vd').length;
+  document.getElementById('selo-evento').textContent=chaves.length+' tipos'+(sem?' · '+sem+' sem departamento':'');
+}
+function registrarEventos(){
+  if(!bruto) return false;
+  let novo=false;
+  estado.config.mapaEvento=estado.config.mapaEvento||{};
+  estado.config.rotulosEvento=estado.config.rotulosEvento||{};
+  bruto.itens.forEach(it=>{
+    if(it.fonte==='vd'||it.colunas.evento<0) return;
+    for(let i=it.cab+1;i<it.matriz.length;i++){
+      const l=it.matriz[i]; if(!l) continue;
+      const cru=String(l[it.colunas.evento]==null?'':l[it.colunas.evento]).trim();
+      const k=chave(cru);
+      if(!k) continue;
+      if(!(k in estado.config.mapaEvento)){
+        estado.config.mapaEvento[k]='';
+        estado.config.rotulosEvento[k]=cru;
+        novo=true;
+      }
+    }
+  });
+  return novo;
+}
+
+/* ============ mapa de mídias ============ */
+function desenharMapaMidias(){
+  const mapa=estado.config.mapaMidia||{}, rot=estado.config.rotulosMidia||{};
+  const chaves=Object.keys(mapa).sort((a,b)=>{
+    const A=String(rot[a]||a), B=String(rot[b]||b);
+    /* agrupa as grafias do mesmo nome e, dentro do grupo, mantém a ordem do texto */
+    const g=chave(A).localeCompare(chave(B),'pt-BR');
+    return g!==0?g:A.localeCompare(B,'pt-BR');
+  });
+  /* quantas grafias existem para cada nome, ignorando caixa e acento */
+  const familias={};
+  chaves.forEach(k=>{ const f=chave(rot[k]||k); familias[f]=(familias[f]||0)+1; });
+  const estilo=t=>{
+    const letras=String(t).replace(/[^A-Za-zÀ-ÿ]/g,'');
+    if(!letras) return '—';
+    if(letras===letras.toUpperCase()) return 'MAIÚSCULA';
+    if(letras===letras.toLowerCase()) return 'minúscula';
+    return 'Mista';
+  };
+  let c='';
+  chaves.forEach(k=>{
+    const texto=rot[k]||k;
+    const atual=CANAIS.indexOf(mapa[k])>=0?mapa[k]:(CANAL_ANTIGO[mapa[k]]||SEM_CLASSE);
+    const irmas=familias[chave(texto)]||1;
+    c+='<tr><th>'+texto+'</th>'+
+      '<td>'+estilo(texto)+(irmas>1?' <b>· '+irmas+' grafias</b>':'')+'</td>'+
+      '<td><select data-desc="'+String(k).replace(/"/g,'&quot;')+'">'+
+      CANAIS.map(m=>'<option value="'+m+'"'+(atual===m?' selected':'')+'>'+m+'</option>').join('')+
+      '</select></td></tr>';
+  });
+  document.getElementById('tabela-mapa').innerHTML=
+    '<table><thead><tr><th>Tipo da mídia</th><th>Grafia</th><th>Canal</th></tr></thead><tbody>'+c+'</tbody></table>';
+  document.querySelectorAll('#tabela-mapa [data-desc]').forEach(el=>el.addEventListener('change',async()=>{
+    await mudarCanal(el.dataset.desc,el.value);
+    recado('recado-mapa', bruto?'Salvo e reagrupado no painel'
+      :'Salvo · anexe o relatório de novo para reagrupar', bruto?'':'var(--atencao)');
+  }));
+  const dr=document.getElementById('dica-reagrupar');
+  if(dr) dr.innerHTML = bruto
+    ? '<span class="ok">Relatório anexado:</span> qualquer mudança aqui já reagrupa o painel na hora.'
+    : '<span class="aten">Sem relatório anexado:</span> mudar o canal aqui vale para a próxima importação. '+
+      'Para reagrupar o que já está no painel, anexe o relatório de novo na aba acima.';
+  const semC=chaves.filter(k=>{
+    const v=mapa[k];
+    return CANAIS.indexOf(v)<0 || v===SEM_CLASSE;
+  }).length;
+  const repetidos=Object.keys(familias).filter(f=>familias[f]>1).length;
+  document.getElementById('selo-mapa').textContent=chaves.length+' tipos'+
+    (repetidos?' · '+repetidos+' nome(s) com mais de uma grafia':'')+
+    (semC?' · '+semC+' em OUTROS':'');
+}
+function registrarTipos(){
+  if(!bruto) return false;
+  let novo=false;
+  bruto.itens.forEach(it=>{
+    if(it.fonte==='vd'){
+      const r=processarVendas(it);
+      Object.keys(r.tipos).forEach(cru=>{
+        const k=chaveMidia(cru);
+        if(!chave(cru)||mapeada(cru)) return;
+        estado.config.mapaMidia[k]=SEM_CLASSE; estado.config.rotulosMidia[k]=cru; novo=true;
+      });
+      return;
+    }
+    for(let i=it.cab+1;i<it.matriz.length;i++){
+      const l=it.matriz[i]; if(!l) continue;
+      const cru=String(l[it.colunas.midia]==null?'':l[it.colunas.midia]).trim() || 'SEM MIDIA';
+      if(!chave(cru)) continue;
+      const k=chaveMidia(cru);
+      if(!mapeada(cru)){
+        estado.config.mapaMidia[k]=SEM_CLASSE;
+        estado.config.rotulosMidia[k]=cru;
+        novo=true;
+      }
+    }
+  });
+  return novo;
+}
+
+/* ============ lista de lojas ============ */
+function desenharLojasConfig(){
+  let c='';
+  LOJAS.forEach((l,i)=>{
+    c+='<tr><th>'+l.nome+'</th><td><select data-praca-loja="'+i+'">'+
+      PRACAS.map(p=>'<option value="'+p+'"'+(l.praca===p?' selected':'')+'>'+p+'</option>').join('')+
+      '</select></td><td>'+(temDado([l.nome])?'com relatório':'sem relatório')+
+      '</td><td><button class="acao miudo perigo" data-remove-loja="'+i+'">Remover</button></td></tr>';
+  });
+  document.getElementById('tabela-lojas').innerHTML=
+    '<table><thead><tr><th>Loja</th><th>Praça</th><th>Situação</th><th></th></tr></thead><tbody>'+c+'</tbody></table>';
+  document.querySelectorAll('[data-praca-loja]').forEach(el=>el.addEventListener('change',async()=>{
+    estado.config.lojas=LOJAS.map((l,i)=>({nome:l.nome,praca:i===+el.dataset.pracaLoja?el.value:l.praca}));
+    aplicarLojas(estado.config.lojas);
+    await salvarTudo(); atualizar();
+  }));
+  document.querySelectorAll('[data-remove-loja]').forEach(el=>el.addEventListener('click',async()=>{
+    const l=LOJAS[+el.dataset.removeLoja]; if(!l) return;
+    if(!confirm('Remover '+l.nome+'? Os números dessa loja são apagados.')) return;
+    estado.config.lojas=LOJAS.filter(x=>x.nome!==l.nome).map(x=>({nome:x.nome,praca:x.praca}));
+    aplicarLojas(estado.config.lojas);
+    delete estado.dados[l.nome];
+    DEPS.forEach(d=>{ delete estado.fontes[l.nome+'|'+d.k];
+      MANUAL_CAMPOS.forEach(cp=>{ delete (estado.manual||{})[l.nome+'|'+d.k+'|'+cp.k]; }); });
+    if(lojaSel===l.nome) lojaSel=null;
+    if(lojaManual===l.nome) lojaManual=null;
+    estado.dados=normalizar(estado.dados);
+    await salvarTudo(); atualizar();
+  }));
+  document.getElementById('selo-lojas').textContent=LOJAS.length+' loja(s)';
+}
+
+/* ============ cobertura e histórico ============ */
+function desenharCobertura(){
+  let c='';
+  FONTES.forEach(f=>{
+    const fo=estado.fontes[f.k];
+    const t=NOMES.reduce((a,n)=>a+CANAIS.reduce((b,m)=>
+      b+DEPS.reduce((s,d)=>s+(+((((estado.dados[n]||{})[d.k]||{})[m])||{})[f.k]||0),0),0),0);
+    c+='<tr><th>'+f.rot+'</th><td class="'+(fo?'':'zero')+'">'+(fo?fmtNum(t)+' linhas · '+dataBR(fo.quando):'—')+'</td>'+
+      '<td>'+(fo&&fo.lojas?fo.lojas.length+' loja(s)':'—')+'</td>'+
+      '<td>'+(fo?fo.arquivo:'—')+'</td></tr>';
+  });
+  const manual=Object.keys(estado.manual||{}).length;
+  c+='<tr><th>Lançamento manual</th><td class="'+(manual?'':'zero')+'">'+
+    (manual?manual+' número(s) travado(s)':'—')+'</td><td>—</td><td>aba Lançar à mão</td></tr>';
+  document.getElementById('tabela-cobertura').innerHTML=
+    '<table><thead><tr><th>Etapa</th><th>Situação</th><th>Lojas</th><th>Arquivo</th></tr></thead><tbody>'+c+'</tbody></table>';
+  document.getElementById('selo-composicao').textContent=
+    FONTES.filter(f=>estado.fontes[f.k]).length+' de '+FONTES.length+' etapas lidas';
+}
+function desenharHistorico(){
+  const el=document.getElementById('historico');
+  if(!historico.length){ el.innerHTML='<div><span>Nenhuma importação registrada ainda.</span></div>'; return; }
+  el.innerHTML=historico.slice().reverse().slice(0,60).map(h=>
+    '<div><b>'+dataBR(h.quando)+'</b><span>'+(h.arquivo||'')+'</span><span>'+(h.resumo||'')+'</span></div>').join('');
+}
+
+/* ============ slides para WhatsApp ============ */
+/* Mesmo template do painel de vendas: régua de referência 1200×675,
+   multiplicada por S para a resolução final. Nada de cor ou desenho muda aqui. */
+const CORES_SLIDE={fundo:'#232323',texto:'#ffffff',marca:'#a4b8c3',
+  sombra:'#2e2e2e',ok:'#48d17a',atencao:'#f2c141',alerta:'#f0625f',
+  cabFundo:'#a4b8c3',cabTexto:'#12191d',linhaA:'#2b2b2b',linhaB:'#262626',mescla:'#333333',colDestaque:'#3a4046',
+  grade:'#3d3d3d',rodape:'#1b1b1b'};
+function mesDoPainel(){
+  return (estado.config.rotuloMes||'').toUpperCase().replace(/\s*·.*$/,'');
+}
+
+/* Marca Geely Eurovia desenhada no canvas, a partir das cores do arquivo oficial. */
+const LOGO_PROP=250/328;
+/* A marca é desenhada no próprio canvas: seis retângulos na grade 3x2 da logo,
+   nos dois tons do arquivo, mais o texto GEELY | EUROVIA. */
+const GEELY_CLARO='#a4b8c3', GEELY_ESCURO='#6f818c';
+const GRADE_GEELY=[[GEELY_CLARO,GEELY_CLARO,GEELY_ESCURO],[GEELY_ESCURO,GEELY_ESCURO,GEELY_CLARO]];
+function carregarLogo(){ return Promise.resolve(null); }
+/* blocos com altura total h, canto superior esquerdo em (x,y) */
+function blocosGeely(ctx,x,y,h,alfa){
+  const vao=h*0.055, alt=(h-vao)/2, larg=alt*1.55;
+  ctx.save();
+  ctx.globalAlpha=alfa===undefined?1:alfa;
+  GRADE_GEELY.forEach((linha,li)=>linha.forEach((cor,ci)=>{
+    ctx.fillStyle=cor;
+    ctx.fillRect(x+ci*(larg+vao), y+li*(alt+vao), larg, alt);
+  }));
+  ctx.restore();
+  return {larg:3*larg+2*vao, alt:h};
+}
+function marcaGeely(ctx,cx,cy,h,alfa){
+  const larg=h*1.55*1.5*2/2;
+  blocosGeely(ctx,cx-larg/2,cy-h/2,h,alfa);
+}
+
+function molduraSlide(ctx,W,H,titulo,subtitulo){
+  const S=W/1200;
+  const px=v=>v*S;
+
+  ctx.fillStyle=CORES_SLIDE.fundo; ctx.fillRect(0,0,W,H);
+
+  /* marca grande esmaecida, canto inferior direito */
+  blocosGeely(ctx,px(930),px(462),px(96),0.06);
+
+  /* faixas amarelas, canto inferior esquerdo */
+  ctx.save();
+  ctx.lineCap='butt'; ctx.strokeStyle=CORES_SLIDE.marca; ctx.lineWidth=px(7);
+  for(let i=0;i<4;i++){
+    const d=px(-12+i*22);
+    ctx.beginPath(); ctx.moveTo(d,H); ctx.lineTo(d+px(95),H-px(95)); ctx.stroke();
+  }
+  ctx.restore();
+
+  /* marca no topo direito: mede tudo antes para encostar na margem sem cortar */
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  const hb=px(46), yb=px(22), baseT=px(58);
+  const fG=`500 ${px(34)}px Montserrat, Barlow, sans-serif`;
+  const fE=`600 ${px(32)}px Montserrat, Barlow, sans-serif`;
+  const fV=`800 ${px(32)}px Montserrat, Barlow, sans-serif`;
+  ctx.font=fG; const wG=ctx.measureText('GEELY').width;
+  ctx.font=fE; const wE=ctx.measureText('EURO').width;
+  ctx.font=fV; const wV=ctx.measureText('VIA').width;
+  const vaoB=hb*0.055, altB=(hb-vaoB)/2, largB=altB*1.55*3+vaoB*2;
+  const total=largB+px(14)+wG+px(30)+wE+wV;
+  let x=px(1142)-total;
+  blocosGeely(ctx,x,yb,hb,1);
+  x+=largB+px(14);
+  ctx.fillStyle=CORES_SLIDE.texto;
+  ctx.font=fG; ctx.fillText('GEELY',x,baseT);
+  x+=wG+px(14);
+  ctx.strokeStyle=CORES_SLIDE.marca; ctx.lineWidth=px(2);
+  ctx.beginPath(); ctx.moveTo(x,yb+px(2)); ctx.lineTo(x,yb+hb); ctx.stroke();
+  x+=px(16);
+  ctx.font=fE; ctx.fillText('EURO',x,baseT);
+  x+=wE;
+  ctx.font=fV; ctx.fillText('VIA',x,baseT);
+
+  /* assinatura no rodapé */
+  ctx.textAlign='right';
+  ctx.font=`700 ${px(13.5)}px Montserrat, Barlow, sans-serif`;
+  ctx.fillText('GEELY EUROVIA',px(1142),px(637));
+
+  /* títulos */
+  ctx.textAlign='center';
+  ctx.font=`700 ${px(30)}px Montserrat, Barlow, sans-serif`;
+  ctx.fillText(titulo,W/2,px(172));
+  let topo=px(212);
+  if(subtitulo){
+    ctx.font=`700 ${px(24)}px Montserrat, Barlow, sans-serif`;
+    ctx.fillText(subtitulo,W/2,px(220));
+    const w=ctx.measureText(subtitulo).width;
+    ctx.strokeStyle=CORES_SLIDE.texto; ctx.lineWidth=px(1.8);
+    ctx.beginPath(); ctx.moveTo(W/2-w/2,px(226)); ctx.lineTo(W/2+w/2,px(226)); ctx.stroke();
+    topo=px(254);
+  }
+  return {S,px,topo,esq:px(40),larg:px(1120),alt:px(552)-topo};
+}
+
+/* Agrupa colunas vizinhas que compartilham o mesmo 'sup'.
+   Colunas sem 'sup' ficam sozinhas e ocupam as duas faixas do cabeçalho. */
+function gruposDe(cols){
+  const g=[]; let i=0;
+  while(i<cols.length){
+    if(cols[i].sup){ let j=i; while(j<cols.length&&cols[j].sup===cols[i].sup) j++;
+      g.push({sup:cols[i].sup,ini:i,fim:j}); i=j; }
+    else { g.push({sup:null,ini:i,fim:i+1}); i++; }
+  }
+  return g;
+}
+
+/* Tabela genérica. cols: [{rot,sup?,esq?}] · linhas: [[{t,cor?,forte?}]] */
+function desenharTabelaSlide(ctx,area,cols,linhas,rodape){
+  const {px,esq,larg,topo}=area;
+  const temSup=cols.some(c=>c.sup);
+  const nLin=linhas.length+(rodape?1:0);
+
+  /* largura natural de cada coluna, medida no tamanho base */
+  let F=px(21);
+  const pad=px(9);
+  const medir=(txt,peso,tam)=>{ ctx.font=`${peso} ${tam}px "Barlow Condensed", Barlow, sans-serif`; return ctx.measureText(txt).width; };
+  const natural=cols.map((c,i)=>{
+    let w=medir(c.rot,700,F*0.94);
+    linhas.concat(rodape?[rodape]:[]).forEach(l=>{ w=Math.max(w,medir(String(l[i]?l[i].t:''),600,F)); });
+    return w+pad*2;
+  });
+  /* o nome do grupo é mesclado, então só precisa caber na soma das colunas dele */
+  gruposDe(cols).forEach(g=>{
+    if(!g.sup) return;
+    const preciso=medir(g.sup,700,F*0.9)+pad*2;
+    let tem=0; for(let k=g.ini;k<g.fim;k++) tem+=natural[k];
+    if(tem<preciso){ const extra=(preciso-tem)/(g.fim-g.ini);
+      for(let k=g.ini;k<g.fim;k++) natural[k]+=extra; }
+  });
+  let total=natural.reduce((a,b)=>a+b,0);
+  if(total>larg){ F=F*(larg/total); }                    /* aperta a fonte se não couber */
+  const escala=larg/total;
+  const colW=natural.map(w=>w*escala);
+
+  const hCab=temSup?F*2.5:F*1.9;
+  let hLin=Math.min(F*1.85,(area.alt-hCab)/nLin);
+  const altTotal=hCab+hLin*nLin;
+  let y=topo+Math.max(0,(area.alt-altTotal)/2);
+
+  const fonteCel=t=>`${t.forte?700:600} ${F}px "Barlow Condensed", Barlow, sans-serif`;
+  ctx.textBaseline='middle';
+
+  /* cabeçalho: nome do modelo mesclado em cima, Meta/Vol/% embaixo */
+  ctx.fillStyle=CORES_SLIDE.cabFundo; ctx.fillRect(esq,y,larg,hCab);
+  const hSup=temSup?hCab*0.44:0;
+  const xIni=[]; { let acc=esq; cols.forEach((c,i)=>{ xIni[i]=acc; acc+=colW[i]; }); }
+  ctx.fillStyle=CORES_SLIDE.cabTexto; ctx.textAlign='center';
+  gruposDe(cols).forEach(g=>{
+    const x0=xIni[g.ini];
+    let w=0; for(let k=g.ini;k<g.fim;k++) w+=colW[k];
+    if(g.sup&&temSup){
+      ctx.font=`700 ${F*0.9}px "Barlow Condensed", Barlow, sans-serif`;
+      ctx.fillText(g.sup,x0+w/2,y+hSup*0.55);
+      ctx.strokeStyle='rgba(26,26,26,0.32)'; ctx.lineWidth=px(1.2);
+      ctx.beginPath(); ctx.moveTo(x0+px(7),y+hSup); ctx.lineTo(x0+w-px(7),y+hSup); ctx.stroke();
+      ctx.fillStyle=CORES_SLIDE.cabTexto;
+      ctx.font=`700 ${F*0.94}px "Barlow Condensed", Barlow, sans-serif`;
+      for(let k=g.ini;k<g.fim;k++) ctx.fillText(cols[k].rot,xIni[k]+colW[k]/2,y+hSup+(hCab-hSup)/2);
+    } else {
+      ctx.font=`700 ${F*0.94}px "Barlow Condensed", Barlow, sans-serif`;
+      ctx.fillText(cols[g.ini].rot,x0+w/2,y+hCab/2);
+    }
+  });
+  /* separadores: altura cheia entre grupos, só a faixa de baixo dentro do grupo */
+  ctx.strokeStyle='rgba(26,26,26,0.32)'; ctx.lineWidth=px(1.2);
+  for(let i=0;i<cols.length-1;i++){
+    const mesmoGrupo = temSup && cols[i].sup && cols[i].sup===cols[i+1].sup;
+    const xb=xIni[i]+colW[i];
+    ctx.beginPath(); ctx.moveTo(xb,y+(mesmoGrupo?hSup:0)); ctx.lineTo(xb,y+hCab); ctx.stroke();
+  }
+  y+=hCab;
+
+  /* corpo */
+  const desenharLinha=(l,fundo,borda)=>{
+    ctx.fillStyle=fundo; ctx.fillRect(esq,y,larg,hLin);
+    /* colunas destacadas ganham fundo próprio, como o .forte do painel.
+       O rodapé mantém o fundo dele, igual ao tfoot da tabela. */
+    if(!borda){
+      let xd=esq;
+      cols.forEach((c,i)=>{
+        if(c.destaque){ ctx.fillStyle=CORES_SLIDE.colDestaque; ctx.fillRect(xd,y,colW[i],hLin); }
+        xd+=colW[i];
+      });
+    }
+    if(borda){ ctx.strokeStyle=CORES_SLIDE.marca; ctx.lineWidth=px(2);
+      ctx.beginPath(); ctx.moveTo(esq,y); ctx.lineTo(esq+larg,y); ctx.stroke(); }
+    let x=esq;
+    cols.forEach((c,i)=>{
+      const cel=l[i]||{t:''};
+      /* células mescladas e suas continuações são desenhadas depois, em bloco */
+      if(cel.oculto||(cel.span&&cel.span>1)){ x+=colW[i]; return; }
+      ctx.fillStyle = cel.cor?CORES_SLIDE[cel.cor]:CORES_SLIDE.texto;
+      ctx.font=fonteCel(cel);
+      if(i===0&&c.esq){ ctx.textAlign='left'; ctx.fillText(cel.t,x+pad,y+hLin/2); }
+      else { ctx.textAlign='center'; ctx.fillText(cel.t,x+colW[i]/2,y+hLin/2); }
+      x+=colW[i];
+    });
+    /* grade vertical */
+    ctx.strokeStyle=CORES_SLIDE.grade; ctx.lineWidth=1;
+    let gx=esq;
+    cols.forEach((c,i)=>{ gx+=colW[i];
+      if(i<cols.length-1){ ctx.beginPath(); ctx.moveTo(gx,y); ctx.lineTo(gx,y+hLin); ctx.stroke(); } });
+    y+=hLin;
+  };
+  const yLinhas=[];
+  linhas.forEach((l,i)=>{ yLinhas.push(y); desenharLinha(l,i%2?CORES_SLIDE.linhaB:CORES_SLIDE.linhaA,false); });
+
+  /* mesclagem vertical: um bloco só, valor centralizado no grupo */
+  let xc=esq;
+  cols.forEach((c,ci)=>{
+    linhas.forEach((l,i)=>{
+      const cel=l[ci];
+      if(!cel||!cel.span||cel.span<2) return;
+      const y0=yLinhas[i], hM=hLin*cel.span;
+      ctx.fillStyle=CORES_SLIDE.mescla; ctx.fillRect(xc,y0,colW[ci],hM);
+      ctx.strokeStyle=CORES_SLIDE.grade; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(xc,y0); ctx.lineTo(xc,y0+hM);
+      if(ci<cols.length-1){ ctx.moveTo(xc+colW[ci],y0); ctx.lineTo(xc+colW[ci],y0+hM); }
+      ctx.stroke();
+      ctx.fillStyle=cel.cor?CORES_SLIDE[cel.cor]:CORES_SLIDE.texto;
+      ctx.font=fonteCel(cel); ctx.textAlign='center';
+      ctx.fillText(cel.t,xc+colW[ci]/2,y0+hM/2);
+    });
+    xc+=colW[ci];
+  });
+
+  if(rodape) desenharLinha(rodape,CORES_SLIDE.rodape,true);
+}
+
+
+
+
+
+/* ---------- os slides deste painel ---------- */
+function corPct(x,ref){
+  const c=classeComp(x,ref);
+  return c==='pct-alto'?'ok':(c==='pct-baixo'?'alerta':'atencao');
+}
+/* mesma tabela da tela: canais nas linhas, VN e VDA em cada etapa */
+function slideCanais(lojas,titulo,sub){
+  return function(ctx,W,H){
+    const geral=celula(lojas,CANAIS);
+    const usados=CANAIS.filter(m=>{
+      if(estado.config.mostrarVazias) return true;
+      const c=celula(lojas,[m]);
+      return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
+    });
+    const area=molduraSlide(ctx,W,H,titulo,sub);
+    const cols=[{rot:'Canal',esq:true}];
+    ETAPAS_TAB.forEach(e=>{
+      cols.push({rot:'VN',sup:e[1]},{rot:'VDA',sup:e[1],destaque:e[0]==='vd'});
+    });
+    cols.push({rot:'%conv.'});
+    const cel=(c,rodape)=>{
+      const out=[];
+      ETAPAS_TAB.forEach(([k])=>{
+        out.push({t:fmtNum(c.vn[k]),cor:c.vn[k]?null:'grade'},
+                 {t:fmtNum(c.vd[k]),cor:c.vd[k]?null:'grade'});
+      });
+      out.push({t:c.temEnt?fmtPct(c.conv):'—',forte:true,
+        cor:(rodape||!c.temEnt)?null:corPct(c.conv,geral.conv)});
+      return out;
+    };
+    const corpo=usados.map(m=>[{t:m,forte:true}].concat(cel(celula(lojas,[m]),false)));
+    const rodape=[{t:'TOTAL',forte:true}].concat(cel(geral,true).map(c=>Object.assign({},c,{forte:true})));
+    desenharTabelaSlide(ctx,area,cols,corpo,rodape);
+  };
+}
+const TAMANHOS={pequeno:1200,medio:1600,grande:1920};
+const larguraSlide=()=>TAMANHOS[estado.config.tamanhoSlide]||TAMANHOS.pequeno;
+let slideAtual=null;
+function slideDe(tipo){
+  if(tipo==='geral'){
+    const lojas=lojasComDado();
+    return {titulo:'Slide · total geral',secao:'bloco-geral',
+      fn:slideCanais(lojas,'LEADS POR MÍDIA - TOTAL GERAL',rotuloAtivo().toUpperCase()+' - '+mesDoPainel())};
+  }
+  if(tipo.indexOf('loja:')===0){
+    const n=tipo.slice(5);
+    return {titulo:'Slide · '+n,secao:null,
+      fn:slideCanais([n],'LEADS POR MÍDIA - '+n,pracaDe(n)+' - '+mesDoPainel())};
+  }
+  return null;
+}
+async function gerarSlide(tipo){
+  const cfg=slideDe(tipo); if(!cfg) return;
+  slideAtual=tipo;
+  const cv=document.getElementById('tela-slide');
+  const L=larguraSlide();
+  cv.width=L; cv.height=Math.round(L*675/1200);
+  const ctx=cv.getContext('2d');
+  try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
+  await carregarLogo();
+  ctx.clearRect(0,0,cv.width,cv.height);
+  cfg.fn(ctx,cv.width,cv.height);
+  document.getElementById('titulo-slide').firstChild.textContent=cfg.titulo+' ';
+  const bloco=document.getElementById('bloco-slide');
+  document.getElementById('aba-canais').appendChild(bloco);
+  bloco.hidden=false;
+  if(bloco.scrollIntoView) bloco.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function nomeArquivoSlide(){
+  return ('geely-midia-'+String(slideAtual).replace('loja:','')).replace(/[^\w\-]/g,'-').toLowerCase()+'.png';
+}
+async function copiarSlide(){
+  const cv=document.getElementById('tela-slide');
+  const rec=document.getElementById('recado-slide');
+  const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+  const mostrar=txt=>{ rec.textContent=txt; rec.classList.add('visivel'); setTimeout(()=>rec.classList.remove('visivel'),2600); };
+  try{
+    if(!navigator.clipboard||!window.ClipboardItem) throw new Error('sem suporte');
+    await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+    mostrar('Copiado · cole no WhatsApp');
+  }catch(e){
+    baixarBlob(blob,nomeArquivoSlide());
+    mostrar('Cópia bloqueada · PNG baixado');
+  }
+}
+function baixarBlob(blob,nome){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=nome; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* ============ utilidades ============ */
+function dataBR(iso){ try{ return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return iso||'—'; } }
+function selo(k,txt,classe){
+  const el=document.getElementById('selo-'+k); if(!el) return;
+  el.textContent=txt; el.className='selo-estado'+(classe?' '+classe:'');
+}
+function recado(id,texto,cor){
+  const rec=document.getElementById(id); if(!rec) return;
+  if(texto) rec.textContent=texto;
+  rec.style.color=cor||'';
+  rec.classList.add('visivel'); setTimeout(()=>rec.classList.remove('visivel'),2600);
+}
+function baixar(nome,conteudo,tipo){
+  const b=new Blob([conteudo],{type:tipo});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=nome; a.click(); URL.revokeObjectURL(a.href);
+}
+function atualizar(){
+  if(slideAtual) setTimeout(()=>gerarSlide(slideAtual),0);
+  desenharFiltro(); desenharPlacar(); desenharGeral(); desenharLojas(); desenharManual();
+  desenharCobertura(); desenharHistorico(); desenharMapaMidias(); desenharMapaEventos(); desenharMapaDepVenda();
+  desenharLojasConfig(); marcarEstado();
+}
+
+/* ============ ligações ============ */
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  const trava=ABAS_TRAVADAS[b.dataset.aba];
+  if(trava && !liberar(trava)) return;
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.painel').forEach(p=>p.hidden=p.id!=='aba-'+b.dataset.aba);
+}));
+document.getElementById('sel-loja-manual').addEventListener('change',e=>{ lojaManual=e.target.value; desenharManual(); });
+document.getElementById('btn-zerar-manual').addEventListener('click',async()=>{
+  if(!confirm('Zerar todas as etapas de '+lojaManual+', em VN e VDA? Os números ficam no controle do manual.')) return;
+  DEPS.forEach(d=>CANAIS.forEach(m=>MANUAL_CAMPOS.forEach(cp=>gravarManual(lojaManual,d.k,m,cp.k,0))));
+  await salvarTudo(); atualizar(); recado('recado-manual','Zerado');
+});
+document.getElementById('btn-soltar-manual').addEventListener('click',async()=>{
+  if(!confirm('Liberar '+lojaManual+'? A próxima importação volta a mandar em todas as etapas dessa loja.')) return;
+  MANUAL_CAMPOS.forEach(cp=>DEPS.forEach(d=>{ delete (estado.manual||{})[lojaManual+'|'+d.k+'|'+cp.k]; }));
+  await salvarTudo(); atualizar(); recado('recado-manual','Liberado');
+});
+document.querySelectorAll('#bloco-geral [data-slide]').forEach(b=>b.addEventListener('click',()=>gerarSlide(b.dataset.slide)));
+document.querySelectorAll('#bloco-geral [data-copiar]').forEach(b=>b.addEventListener('click',()=>copiarTabela(b.dataset.copiar)));
+document.getElementById('sel-tamanho').addEventListener('change',async e=>{
+  estado.config.tamanhoSlide=e.target.value; await guardar('config',estado.config);
+  if(slideAtual) gerarSlide(slideAtual);
+});
+document.getElementById('btn-copiar-slide').addEventListener('click',copiarSlide);
+document.getElementById('btn-baixar-slide').addEventListener('click',async()=>{
+  const cv=document.getElementById('tela-slide');
+  baixarBlob(await new Promise(r=>cv.toBlob(r,'image/png')),nomeArquivoSlide());
+});
+document.getElementById('btn-fechar-slide').addEventListener('click',()=>{
+  document.getElementById('bloco-slide').hidden=true; slideAtual=null;
+});
+document.querySelectorAll('.area-anexo[data-anexo]').forEach(area=>{
+  const dep=area.dataset.anexo;
+  const inp=document.querySelector('input[data-arquivo="'+dep+'"]');
+  area.addEventListener('click',()=>inp.click());
+  area.addEventListener('dragover',e=>{ e.preventDefault(); area.classList.add('sobre'); });
+  area.addEventListener('dragleave',()=>area.classList.remove('sobre'));
+  area.addEventListener('drop',async e=>{ e.preventDefault(); area.classList.remove('sobre');
+    if(e.dataTransfer.files.length){ await receberArquivos(e.dataTransfer.files,dep);
+      const a=registrarTipos(), b=registrarEventos(), c2=registrarDepVenda();
+      if(a||b||c2){ await guardar('config',estado.config); desenharMapaMidias(); desenharMapaEventos(); desenharMapaDepVenda(); desenharImportacao(); } } });
+  inp.addEventListener('change',async e=>{
+    if(e.target.files.length){ await receberArquivos(e.target.files,dep);
+      const a=registrarTipos(), b=registrarEventos(), c2=registrarDepVenda();
+      if(a||b||c2){ await guardar('config',estado.config); desenharMapaMidias(); desenharMapaEventos(); desenharMapaDepVenda(); desenharImportacao(); } }
+    e.target.value='';
+  });
+});
+document.getElementById('btn-evento-padrao').addEventListener('click',async()=>{
+  if(!confirm('Voltar os tipos de evento ao padrão? NOVOS WEB em VN, MOVE BRASIL e VENDA DIRETA WEB em VDA, e o resto sem departamento.')) return;
+  const e=mapaEventoInicial();
+  estado.config.mapaEvento=e.mapa; estado.config.rotulosEvento=e.rotulos;
+  if(bruto) registrarEventos();
+  await salvarTudo(); atualizar(); if(bruto) desenharImportacao(); recado('recado-evento','Padrão restaurado');
+});
+document.getElementById('btn-ler-google').addEventListener('click',lerVendasGoogle);
+document.getElementById('btn-abrir-google').addEventListener('click',()=>{
+  const l=document.getElementById('link-vendas').value.trim();
+  if(l) window.open(l,'_blank','noopener');
+});
+['link-vendas','aba-google'].forEach(id=>document.getElementById(id).addEventListener('change',async e=>{
+  if(id==='link-vendas') estado.config.linkVendas=e.target.value.trim();
+  else estado.config.abaVendas=e.target.value.trim();
+  await guardar('config',estado.config); recado('recado-google','Guardado');
+}));
+document.getElementById('url-drive').addEventListener('change',async e=>{
+  estado.config.urlDrive=e.target.value.trim();
+  await guardar('config',estado.config); montarAjustes(); recado('recado-drive','Guardado');
+});
+document.getElementById('auto-drive').addEventListener('change',async e=>{
+  estado.config.autoDrive=e.target.value==='1';
+  await guardar('config',estado.config); recado('recado-drive','Guardado');
+});
+document.getElementById('btn-subir-drive').addEventListener('click',subirDrive);
+document.getElementById('btn-baixar-drive').addEventListener('click',()=>baixarDrive(false));
+document.getElementById('btn-testar-drive').addEventListener('click',testarDrive);
+document.getElementById('btn-mapa-padrao').addEventListener('click',async()=>{
+  if(!confirm('Voltar o mapa de mídias ao padrão? Os tipos que você classificou à mão voltam ao original.')) return;
+  const i=mapaInicial();
+  estado.config.mapaMidia=i.mapa; estado.config.rotulosMidia=i.rotulos;
+  if(bruto) registrarTipos();
+  await salvarTudo(); atualizar(); recado('recado-mapa','Mapa padrão');
+});
+document.getElementById('btn-add-loja').addEventListener('click',async()=>{
+  const nome=document.getElementById('nova-loja').value.trim().toUpperCase();
+  if(!nome){ alert('Digite o nome da loja.'); return; }
+  if(NOMES.indexOf(nome)>=0){ alert(nome+' já está na lista.'); return; }
+  const praca=document.getElementById('nova-praca').value;
+  estado.config.lojas=LOJAS.map(l=>({nome:l.nome,praca:l.praca})).concat([{nome,praca}]);
+  aplicarLojas(estado.config.lojas);
+  estado.dados=normalizar(estado.dados);
+  document.getElementById('nova-loja').value='';
+  await salvarTudo(); atualizar(); recado('recado-dados',nome+' incluída');
+});
+document.getElementById('rotulo-mes').addEventListener('change',async e=>{
+  estado.config.rotuloMes=e.target.value.trim()||'Geely';
+  await salvarTudo(); marcarCarimbo();
+});
+document.getElementById('sel-vazias').addEventListener('change',async e=>{
+  estado.config.mostrarVazias=e.target.value==='1';
+  await salvarTudo(); atualizar();
+});
+document.getElementById('btn-backup').addEventListener('click',()=>{
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  baixar('backup-midia-geely-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json',
+    JSON.stringify({versao:2,painel:'midia-geely',gerado:new Date().toISOString(),
+      config:estado.config,dados:estado.dados,manual:estado.manual,fontes:estado.fontes,historico},null,1),'application/json');
+});
+document.getElementById('btn-restaurar').addEventListener('click',()=>document.getElementById('arquivo-backup').click());
+document.getElementById('arquivo-backup').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const fr=new FileReader();
+  fr.onload=async()=>{
+    try{
+      const o=JSON.parse(fr.result);
+      if(!o||!o.dados) throw new Error('formato');
+      estado.config=Object.assign({},PADRAO.config,o.config||{});
+      aplicarLojas(estado.config.lojas);
+      estado.dados=normalizar(o.dados);
+      estado.fontes=o.fontes||{};
+      estado.manual=(o.manual&&typeof o.manual==='object')?o.manual:((o.manualVd&&typeof o.manualVd==='object')?
+        Object.keys(o.manualVd).reduce((a,k)=>{a[k+'|vd']=true;return a;},{}):{});
+      historico=Array.isArray(o.historico)?o.historico:[];
+      await salvarTudo(true);
+      atualizadoEm=o.gerado||new Date().toISOString(); await guardar('atualizado',atualizadoEm);
+      montarAjustes(); atualizar(); recado('recado-dados','Backup restaurado');
+    }catch(err){ alert('Esse arquivo precisa ser um backup gerado por este painel de mídia da Geely.'); }
+  };
+  fr.readAsText(f); e.target.value='';
+});
+document.getElementById('btn-exportar').addEventListener('click',()=>{
+  const l=['loja;praca;canal;entrantes_vn;entrantes_vda;agendados_vn;agendados_vda;fluxo_vn;fluxo_vda;vendas_vn;vendas_vda;faturados_vn;faturados_vda;pct_conv'];
+  NOMES.forEach(n=>{
+    if(!temDado([n])) return;
+    CANAIS.forEach(m=>{
+      const c=celula([n],[m]);
+      if(!(c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft)) return;
+      l.push([n,pracaDe(n),m,c.vn.ent,c.vd.ent,c.vn.ag,c.vd.ag,c.vn.fl,c.vd.fl,c.vn.vd,c.vd.vd,c.vn.ft,c.vd.ft,
+        c.temEnt?fmtPct(c.conv):''].join(';'));
+    });
+  });
+  const g=celula(lojasComDado(),CANAIS);
+  l.push(['TOTAL GERAL','GRUPO','TODOS',g.vn.ent,g.vd.ent,g.vn.ag,g.vd.ag,g.vn.fl,g.vd.fl,g.vn.vd,g.vd.vd,g.vn.ft,g.vd.ft,fmtPct(g.conv)].join(';'));
+  baixar('leads-por-midia-geely.csv','\ufeff'+l.join('\n'),'text/csv;charset=utf-8');
+});
+document.getElementById('btn-zerar').addEventListener('click',async()=>{
+  if(!liberar('para apagar tudo')) return;
+  if(!confirm('Isso apaga os números, as fontes e o histórico. O mapa de mídias é mantido. Continuar?')) return;
+  estado.dados=vazio(); estado.fontes={}; historico=[]; bruto=null;
+  await salvarTudo(); montarAjustes(); atualizar(); desenharImportacao();
+  recado('recado-dados','Apagado');
+});
+
+function montarAjustes(){
+  document.getElementById('link-vendas').value=estado.config.linkVendas||LINK_VENDAS_PADRAO||'';
+  document.getElementById('aba-google').value=estado.config.abaVendas||'';
+  document.getElementById('url-drive').value=estado.config.urlDrive||'';
+  document.getElementById('auto-drive').value=estado.config.autoDrive?'1':'0';
+  selo('google',estado.config.linkVendas?'link guardado':'nenhum link configurado',estado.config.linkVendas?'ok':'');
+  selo('drive',estado.config.urlDrive?(estado.config.driveEm?'último envio '+dataBR(estado.config.driveEm):'app configurado'):'não configurado',
+    estado.config.urlDrive?'ok':'');
+  document.getElementById('rotulo-mes').value=estado.config.rotuloMes||'';
+  document.getElementById('sel-tamanho').value=estado.config.tamanhoSlide||'pequeno';
+  document.getElementById('sel-vazias').value=estado.config.mostrarVazias?'1':'0';
+}
+
+(async function inicio(){
+  marcarTrava();
+  await carregarTudo();
+  await salvarTudo(true);
+  montarAjustes();
+  atualizar();
+  /* carrega o último backup do Drive, quando você deixa marcado */
+  if(estado.config.autoDrive && estado.config.urlDrive) baixarDrive(true);
+})();
+</script>
+</body>
+</html>
