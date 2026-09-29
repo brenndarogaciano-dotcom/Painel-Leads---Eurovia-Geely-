@@ -1398,13 +1398,23 @@ function urlCSV(link,aba){
   const gid=(l.match(/[#&?]gid=(\d+)/)||[])[1];
   return gid ? base+'/export?format=csv&gid='+gid : base+'/gviz/tq?tqx=out:csv';
 }
+/* no Google as abas se chamam SETEMBRO/2026; o campo vazio assume o mês de hoje */
+function abaSugerida(){
+  const hoje=new Date();
+  return MESES_NOME[hoje.getMonth()].toUpperCase()+'/'+hoje.getFullYear();
+}
 function caixaGoogle(html,classe){
   const el=document.getElementById('caixa-google');
   el.innerHTML = classe ? '<span class="'+classe+'">'+html+'</span>' : html;
 }
 async function lerVendasGoogle(){
   const link=document.getElementById('link-vendas').value.trim();
-  const aba=document.getElementById('aba-google').value.trim();
+  let aba=document.getElementById('aba-google').value.trim();
+  if(!aba){
+    /* sem aba o Google devolve a primeira da planilha, que é de janeiro */
+    aba=abaSugerida();
+    document.getElementById('aba-google').value=aba;
+  }
   estado.config.linkVendas=link; estado.config.abaVendas=aba;
   await guardar('config',estado.config);
   try{
@@ -1414,14 +1424,15 @@ async function lerVendasGoogle(){
     const texto=await r.text();
     if(/^\s*</.test(texto)) throw new Error('veio uma página de login em vez dos dados. Deixe a planilha como "qualquer pessoa com o link".');
     const matriz=lerCSV(texto);
-    if(!ehPlanilhaVendas(matriz)) throw new Error('não achei as colunas LOJA, DATA DA VENDA, NF e MÍDIA nessa aba.');
+    if(!ehPlanilhaVendas(matriz)) throw new Error('a aba <b>'+aba+'</b> veio, mas sem as colunas DATA DA VENDA, NF e MÍDIA. '+
+      'Confira o nome exato da aba — no Google elas têm barra, como <b>'+abaSugerida()+'</b>.');
     const antigos=(bruto&&bruto.itens?bruto.itens:[]).filter(x=>x.fonte!=='vd');
     bruto={itens:antigos.concat([{nome:'planilha do Google',fonte:'vd',abas:{},ordem:[aba||'aba única'],
       aba:aba||'aba única',matriz,cab:0,colunas:{}}])};
     registrarTipos(); registrarDepVenda();
     await guardar('config',estado.config);
     selo('google','planilha lida · confira abaixo','ok');
-    caixaGoogle('Lidas <b>'+fmtNum(matriz.length)+'</b> linhas da aba <b>'+(aba||'única')+'</b>. Confira o resumo no bloco de importação e clique em <b>Aplicar no painel</b>.','ok');
+    caixaGoogle('Lidas <b>'+fmtNum(matriz.length)+'</b> linhas da aba <b>'+aba+'</b>. Confira o resumo no bloco de importação e clique em <b>Aplicar no painel</b>.','ok');
     desenharImportacao();
     recado('recado-google','Planilha lida');
   }catch(e){
@@ -1437,6 +1448,15 @@ async function lerVendasGoogle(){
 function caixaDrive(html,classe){
   const el=document.getElementById('caixa-drive');
   el.innerHTML = classe ? '<span class="'+classe+'">'+html+'</span>' : html;
+}
+/* o Apps Script responde com códigos bem específicos quando a publicação está errada */
+function explicaDrive(status){
+  if(status===404) return 'o endereço respondeu 404. Quase sempre é a publicação: em Implantar, '+
+    'o tipo precisa ser <b>App da Web</b>, e o endereço tem de ser o que termina em <b>/exec</b>, '+
+    'não o de teste, que termina em /dev.';
+  if(status===401||status===403) return 'o endereço respondeu '+status+'. Em Implantar, '+
+    'deixe <b>Quem pode acessar: Qualquer pessoa</b>, e não "qualquer pessoa com conta do Google".';
+  return 'o app respondeu '+status+'.';
 }
 function pacoteBackup(){
   return {versao:3,painel:'midia-geely',gerado:new Date().toISOString(),
@@ -1463,6 +1483,7 @@ async function subirDrive(){
     /* text/plain evita o preflight, que o Apps Script não responde */
     const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify({acao:'salvar',pacote:pacoteBackup()})});
+    if(!r.ok) throw new Error(explicaDrive(r.status));
     const o=await r.json();
     if(!o.ok) throw new Error(o.erro||'o app recusou o envio');
     estado.config.driveEm=new Date().toISOString();
@@ -1481,6 +1502,7 @@ async function baixarDrive(silencioso){
   try{
     if(!silencioso) selo('drive','buscando…');
     const r=await fetch(url+(url.indexOf('?')>=0?'&':'?')+'acao=ultimo',{redirect:'follow'});
+    if(!r.ok) throw new Error(explicaDrive(r.status));
     const o=await r.json();
     if(!o.ok) throw new Error(o.erro||'nada encontrado na pasta');
     if(!silencioso && !confirm('Carregar o backup de '+dataBR(o.quando)+'? O que está neste navegador é substituído.')) return;
@@ -1499,6 +1521,7 @@ async function testarDrive(){
   if(!url){ caixaDrive('Cole o endereço do app de backup primeiro.','ruim'); return; }
   try{
     const r=await fetch(url+(url.indexOf('?')>=0?'&':'?')+'acao=teste',{redirect:'follow'});
+    if(!r.ok) throw new Error(explicaDrive(r.status));
     const o=await r.json();
     caixaDrive(o.ok?('Conexão certa. Pasta <b>'+(o.pasta||'?')+'</b> com <b>'+fmtNum(o.arquivos||0)+'</b> backup(s).')
       :('O app respondeu, mas com erro: '+(o.erro||'')),o.ok?'ok':'ruim');
@@ -2272,7 +2295,7 @@ document.getElementById('btn-zerar').addEventListener('click',async()=>{
 
 function montarAjustes(){
   document.getElementById('link-vendas').value=estado.config.linkVendas||LINK_VENDAS_PADRAO||'';
-  document.getElementById('aba-google').value=estado.config.abaVendas||'';
+  document.getElementById('aba-google').value=estado.config.abaVendas||abaSugerida();
   document.getElementById('url-drive').value=estado.config.urlDrive||'';
   document.getElementById('auto-drive').value=estado.config.autoDrive?'1':'0';
   selo('google',estado.config.linkVendas?'link guardado':'nenhum link configurado',estado.config.linkVendas?'ok':'');
