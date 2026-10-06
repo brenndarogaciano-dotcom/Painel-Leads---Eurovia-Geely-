@@ -2592,7 +2592,7 @@ function desenharRelatorioVendedor(){
   linhas.forEach(l=>{
     const pVF=pct(l.vd,l.fl), pVE=pct(l.vd,l.enc),
           pFF=pct(l.ft,l.fl), pFE=pct(l.ft,l.enc);
-    corpo+='<tr><th>'+l.loja+'</th><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
+    corpo+='<tr><th>'+l.nome+'</th><td>'+l.loja+'</td><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
       '<td class="'+(l.enc?'':'zero')+'">'+fmtNum(l.enc)+'</td>'+
       '<td class="'+(l.ag?'':'zero')+'">'+fmtNum(l.ag)+'</td>'+
       '<td class="'+(l.ins?'':'zero')+'">'+fmtNum(l.ins)+'</td>'+
@@ -2607,7 +2607,7 @@ function desenharRelatorioVendedor(){
   });
   const pVF=pct(tot.vd,tot.fl), pVE=pct(tot.vd,tot.enc),
         pFF=pct(tot.ft,tot.fl), pFE=pct(tot.ft,tot.enc);
-  const rodape='<tr><th>TOTAL</th><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
+  const rodape='<tr><th>TOTAL</th><td>—</td><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
     '<td>'+fmtNum(tot.ag)+'</td>'+
     '<td>'+fmtNum(tot.ins)+'</td>'+
     '<td>'+fmtNum(tot.fl)+'</td>'+
@@ -2619,7 +2619,7 @@ function desenharRelatorioVendedor(){
     '<td>'+(tot.fl?fmtPct(pFF):'—')+'</td></tr>';
   const T=(c,r)=>thOrd('vendedor',c,r).replace('<th','<th rowspan="2"');
   const S=(c,r)=>thOrd('vendedor',c,r);
-  alvo.innerHTML='<table><thead><tr>'+T('loja','Loja')+T('dep','Dep')+
+  alvo.innerHTML='<table><thead><tr>'+T('nome','Vendedor')+T('loja','Loja')+T('dep','Dep')+
     T('enc','Encaminhados')+T('ag','Agendados')+T('ins','Insucessos')+T('fl','Fluxo')+
     '<th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
     '<tr class="sub">'+
@@ -2637,16 +2637,16 @@ function desenharRelatorioVendedor(){
 }
 function copiarRelVendedor(){
   const linhas=_linhasVendedor();
-  const cab=['Loja','Dep','Encaminhados','Agendados','Insucessos','Fluxo',
+  const cab=['Vendedor','Loja','Dep','Encaminhados','Agendados','Insucessos','Fluxo',
     'Venda','% V/Enc.','% V/Fluxo','Faturados','% F/Enc.','% F/Fluxo'];
   const l=[cab]; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
   linhas.forEach(r=>{
-    l.push([r.loja,r.dep==='vn'?'VN':'VDA',r.enc,r.ag,r.ins,r.fl,
+    l.push([r.nome,r.loja,r.dep==='vn'?'VN':'VDA',r.enc,r.ag,r.ins,r.fl,
       r.vd,r.enc?fmtPct(pct(r.vd,r.enc)):'',r.fl?fmtPct(pct(r.vd,r.fl)):'',
       r.ft,r.enc?fmtPct(pct(r.ft,r.enc)):'',r.fl?fmtPct(pct(r.ft,r.fl)):'']);
     ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=r[k]);
   });
-  l.push(['TOTAL','',tot.enc,tot.ag,tot.ins,tot.fl,
+  l.push(['TOTAL','','',tot.enc,tot.ag,tot.ins,tot.fl,
     tot.vd,tot.enc?fmtPct(pct(tot.vd,tot.enc)):'',tot.fl?fmtPct(pct(tot.vd,tot.fl)):'',
     tot.ft,tot.enc?fmtPct(pct(tot.ft,tot.enc)):'',tot.fl?fmtPct(pct(tot.ft,tot.fl)):'']);
   navigator.clipboard.writeText(l.map(r=>r.join('\t')).join('\n'))
