@@ -2573,7 +2573,7 @@ function desenharRelatorioVendedor(){
     const pAg=pct(l.ag,l.enc), pIE=pct(l.ins,l.enc), pFl=pct(l.fl,l.ag),
           pVF=pct(l.vd,l.fl), pVE=pct(l.vd,l.enc),
           pFF=pct(l.ft,l.fl), pFE=pct(l.ft,l.enc);
-    corpo+='<tr><th>'+l.loja+'</th><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
+    corpo+='<tr><th>'+l.nome+'</th><td>'+l.loja+'</td><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
       '<td class="'+(l.enc?'':'zero')+'">'+fmtNum(l.enc)+'</td>'+
       '<td class="'+(l.ag?'':'zero')+'">'+fmtNum(l.ag)+'</td>'+
       '<td class="'+(l.enc?cls(pAg):'zero')+'">'+(l.enc?fmtPct(pAg):'—')+'</td>'+
@@ -2592,7 +2592,7 @@ function desenharRelatorioVendedor(){
   const pAg=pct(tot.ag,tot.enc), pIE=pct(tot.ins,tot.enc), pFl=pct(tot.fl,tot.ag),
         pVF=pct(tot.vd,tot.fl), pVE=pct(tot.vd,tot.enc),
         pFF=pct(tot.ft,tot.fl), pFE=pct(tot.ft,tot.enc);
-  const rodape='<tr><th>TOTAL</th><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
+  const rodape='<tr><th>TOTAL</th><td>—</td><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
     '<td>'+fmtNum(tot.ag)+'</td><td>'+(tot.enc?fmtPct(pAg):'—')+'</td>'+
     '<td>'+fmtNum(tot.ins)+'</td><td>'+(tot.enc?fmtPct(pIE):'—')+'</td>'+
     '<td>'+fmtNum(tot.fl)+'</td><td>'+(tot.ag?fmtPct(pFl):'—')+'</td>'+
@@ -2602,7 +2602,7 @@ function desenharRelatorioVendedor(){
     '<td>'+(tot.enc?fmtPct(pFE):'—')+'</td></tr>';
   const T=(c,r)=>thOrd('vendedor',c,r).replace('<th','<th rowspan="2"');
   const S=(c,r)=>thOrd('vendedor',c,r);
-  alvo.innerHTML='<table><thead><tr>'+T('loja','Loja')+T('dep','Dep')+
+  alvo.innerHTML='<table><thead><tr>'+T('nome','Vendedor')+T('loja','Loja')+T('dep','Dep')+
     T('enc','Encaminhados')+'<th colspan="2">Agendados</th><th colspan="2">Insucessos</th>'+
     '<th colspan="2">Fluxo</th><th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
     '<tr class="sub">'+S('ag','Total')+S('pct_ag','vs encaminhados')+
@@ -2622,11 +2622,11 @@ function desenharRelatorioVendedor(){
 }
 function copiarRelVendedor(){
   const linhas=_linhasVendedor();
-  const cab=['Loja','Dep','Encaminhados','Agendados','% Ag','Insucessos','% Ins',
+  const cab=['Vendedor','Loja','Dep','Encaminhados','Agendados','% Ag','Insucessos','% Ins',
     'Fluxo','% Fluxo','Venda','% V/Fluxo','% V/Enc.','Faturados','% F/Fluxo','% F/Enc.'];
   const l=[cab]; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
   linhas.forEach(r=>{
-    l.push([r.loja,r.dep==='vn'?'VN':'VDA',r.enc,
+    l.push([r.nome,r.loja,r.dep==='vn'?'VN':'VDA',r.enc,
       r.ag,r.enc?fmtPct(pct(r.ag,r.enc)):'',
       r.ins,r.enc?fmtPct(pct(r.ins,r.enc)):'',
       r.fl,r.ag?fmtPct(pct(r.fl,r.ag)):'',
@@ -2634,7 +2634,7 @@ function copiarRelVendedor(){
       r.ft,r.fl?fmtPct(pct(r.ft,r.fl)):'',r.enc?fmtPct(pct(r.ft,r.enc)):'']);
     ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=r[k]);
   });
-  l.push(['TOTAL','',tot.enc,
+  l.push(['TOTAL','','',tot.enc,
     tot.ag,tot.enc?fmtPct(pct(tot.ag,tot.enc)):'',
     tot.ins,tot.enc?fmtPct(pct(tot.ins,tot.enc)):'',
     tot.fl,tot.ag?fmtPct(pct(tot.fl,tot.ag)):'',
