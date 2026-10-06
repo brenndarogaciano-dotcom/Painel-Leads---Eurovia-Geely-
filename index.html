@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leads por Mídia · Geely Eurovia</title>
+<title>Painel Leads - Geely · Grupo Eurovia</title>
 <meta name="theme-color" content="#16181a">
 <link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -182,7 +182,7 @@
 <div class="envelope">
 
   <header class="topo">
-    <h1>Geely · leads por <em>mídia</em></h1>
+    <h1>Painel <em>leads</em> - Geely</h1>
     <span class="carimbo" id="carimbo-mes">Agosto 2026 · Geely</span>
     <span class="carimbo secundaria" id="carimbo-fonte">Sem atualização nesta sessão</span>
   </header>
@@ -190,18 +190,93 @@
   <div class="placar" id="placar"></div>
 
   <nav role="tablist">
-    <button role="tab" data-aba="canais" aria-selected="true">Canais por loja</button>
+    <button role="tab" data-aba="loja" aria-selected="true">Relatório por loja</button>
+    <button role="tab" data-aba="vendedor" aria-selected="false">Relatório por vendedor</button>
+    <button role="tab" data-aba="canais" aria-selected="false">Relatório por mídia</button>
     <button role="tab" data-aba="lancar" aria-selected="false">Lançar à mão <span class="trava" id="trava-lancar">🔒</span></button>
     <button role="tab" data-aba="ajustes" aria-selected="false">Ajustes <span class="trava" id="trava-ajustes">🔒</span></button>
   </nav>
 
-  <section class="painel" id="aba-canais">
+  <section class="painel" id="aba-loja">
+    <div class="bloco">
+      <h2>VN por loja <span class="selo-estado" id="selo-loja-vn"></span>
+        <span class="controles">
+          <button class="acao miudo" id="btn-ordem-padrao-loja-vn">Ordenação padrão</button>
+          <button class="acao" id="btn-copiar-loja-vn">Copiar tabela</button>
+          <button class="acao destaque-btn" id="btn-slide-loja-vn">Slide</button>
+          <span class="recado" id="recado-loja-vn">Copiado</span>
+        </span>
+      </h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-loja-vn"></div>
+        <p class="dica"><b>Entrantes</b> é o total do relatório de Entrantes. <b>Encaminhados</b> são leads com vendedor identificado (prefixo <code>[ VN ]</code> ou <code>[ GVN ]</code>). <b>Venda</b> e <b>Faturados</b> vêm da planilha de vendas. Percentuais: <code>Enc/Ent</code>, <code>Ag/Ent</code>, <code>Fluxo/Ag</code>, <code>Venda/Fluxo</code>, <code>Venda/Ent</code>, <code>Fat/Fluxo</code>, <code>Fat/Ent</code>.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>VDA por loja <span class="selo-estado" id="selo-loja-vd"></span>
+        <span class="controles">
+          <button class="acao miudo" id="btn-ordem-padrao-loja-vd">Ordenação padrão</button>
+          <button class="acao" id="btn-copiar-loja-vd">Copiar tabela</button>
+          <button class="acao destaque-btn" id="btn-slide-loja-vd">Slide</button>
+          <span class="recado" id="recado-loja-vd">Copiado</span>
+        </span>
+      </h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-loja-vd"></div>
+        <p class="dica">Mesma lista de lojas Geely, agora olhando o departamento VDA. Encaminhados em VDA conta leads com prefixo <code>[ VD ]</code> no vendedor.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="painel" id="aba-vendedor" hidden>
+    <div class="bloco">
+      <h2>Filtros <span class="selo-estado" id="selo-filtro-vendedor"></span></h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div><label class="campo" for="filtro-vendedor-dep">Departamento</label>
+            <select id="filtro-vendedor-dep">
+              <option value="">Todos</option>
+              <option value="vn">VN</option>
+              <option value="vd">VDA</option>
+            </select></div>
+          <div><label class="campo" for="filtro-vendedor-praca">Praça</label>
+            <select id="filtro-vendedor-praca">
+              <option value="">Todas</option>
+            </select></div>
+          <div><label class="campo" for="filtro-vendedor-loja">Loja</label>
+            <select id="filtro-vendedor-loja">
+              <option value="">Todas</option>
+            </select></div>
+        </div>
+        <div class="barra">
+          <button class="acao miudo" id="btn-limpar-filtro-vendedor">Limpar filtros</button>
+          <button class="acao miudo" id="btn-ordem-padrao-vendedor">Ordenação padrão</button>
+          <button class="acao" id="btn-copiar-vendedor">Copiar tabela</button>
+          <span class="recado" id="recado-vendedor">Copiado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Relatório por vendedor <span class="selo-estado" id="selo-vendedor"></span></h2>
+      <div class="miolo">
+        <div class="rolagem" id="tabela-vendedor"></div>
+        <p class="dica">Cada linha é um vendedor identificado nos mergulhos pelo prefixo (<code>[ VN ]</code>, <code>[ GVN ]</code>, <code>[ VD ]</code>). <b>Encaminhados</b>, <b>Agendados</b> e <b>Fluxo</b> vêm dos mergulhos; <b>Venda</b> e <b>Faturados</b> vêm da planilha de vendas; <b>Insucessos</b> vem do relatório <i>Mergulho por Empresa · Insucesso</i> (anexe em Ajustes). Todas as % do nível vendedor são calculadas sobre Encaminhados — leads que o vendedor efetivamente recebeu. Nos insucessos, as cores se invertem: verde = taxa baixa (bom).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="painel" id="aba-canais" hidden>
     <div class="filtro" id="filtro"></div>
 
     <div class="bloco" id="bloco-geral">
       <h2>Total geral <span class="selo-estado" id="selo-geral"></span>
         <span class="controles">
-          <button class="acao miudo destaque-btn" data-slide="geral">Slide</button>
+          <button class="acao miudo" id="btn-ordem-padrao-canais">Ordenação padrão</button>
+          <button class="acao" data-copiar="geral">Copiar tabela</button>
+          <button class="acao destaque-btn" data-slide="geral">Slide</button>
+          <span class="recado" id="recado-geral">Copiado</span>
         </span>
       </h2>
       <div class="miolo">
@@ -211,10 +286,6 @@
           <span class="pct-alto">acima do total</span>
           <span class="pct-medio">igual</span>
           <span class="pct-baixo">abaixo</span>
-        </div>
-        <div class="barra">
-          <button class="acao miudo" data-copiar="geral">Copiar tabela</button>
-          <span class="recado" id="recado-geral">Copiado</span>
         </div>
         <p class="dica" id="dica-geral"></p>
       </div>
@@ -322,6 +393,15 @@
               <input type="file" data-arquivo="vd" accept=".xlsx,.xls,.csv" hidden>
             </div>
           </div>
+          <div>
+            <label class="campo">6 · Insucessos <span class="selo-estado" id="selo-ins">nenhum arquivo</span></label>
+            <div class="area-anexo" data-anexo="ins">
+              <strong>Anexar insucessos</strong>
+              <span>relatório <b>Mergulho por Empresa · Insucesso</b></span>
+              <span>arraste aqui ou clique para escolher</span>
+              <input type="file" data-arquivo="ins" accept=".xlsx,.xls,.csv" multiple hidden>
+            </div>
+          </div>
         </div>
         <div id="mapa-midia"></div>
         <p class="dica">Cada etapa tem o seu botão e o seu relatório, na ordem do funil. As duas partes do fluxo somam na mesma coluna. A <b>loja</b> sai da coluna <code>Empresa</code>, o <b>canal</b> da coluna <code>Midia</code> e o <b>departamento</b> da coluna <code>Tipo Evento</code>. Todas as linhas entram: não há descarte por motivo de conclusão, e o tipo de evento sem departamento definido é avisado na importação. As <b>vendas</b> vêm da aba Lançar à mão.</p>
@@ -386,7 +466,7 @@
       <h2>PF/PJ e departamento <span class="selo-estado" id="selo-depvenda"></span></h2>
       <div class="miolo">
         <div class="rolagem" id="tabela-depvenda"></div>
-        <p class="dica">Na planilha de vendas o departamento sai da coluna <code>PF / VD</code>, e a loja da coluna <code>LOJA</code>. <b>Venda</b> é a linha cuja data cai no mês da aba; <b>faturado</b> é toda linha com NF preenchida, mesmo que a venda seja de outro mês. Já vêm definidos <b>PF</b> em VN e <b>VD</b> em VDA. Valor novo entra como <b>não definido</b> e a venda não é contada até você escolher.</p>
+        <p class="dica">Na planilha de vendas o departamento sai de uma coluna que marca <code>VN</code> (veículos novos) ou <code>VD</code> (venda direta) — pode se chamar <code>DEPARTAMENTO</code>, <code>PF/VD</code>, <code>VN/VD</code>, o que for. A loja sai da coluna <code>LOJA</code>. <b>Toda linha preenchida</b> (com data, cliente ou vendedor) conta como <b>venda</b>; <b>faturado</b> conta quando a <b>coluna NF está preenchida</b> na mesma linha. Rótulos antigos (como PF ou PJ) ainda são lidos pelo mapa abaixo pra compatibilidade.</p>
       </div>
     </div>
 
@@ -582,7 +662,9 @@ const ETAPAS_ARQ=[
   {k:'cAg',rot:'Comparecidos agendados',cab:'Comp. Agendado'},
   {k:'cNao',rot:'Comparecidos não agendados',cab:'Comp. Não Agendado'},
   {k:'vd',rot:'Vendas',cab:'Vendidos'}];
-const CAMPOS=['ent','ag','cAg','cNao','vd','ft'];
+const CAMPOS=['ent','enc','ag','cAg','cNao','vd','ft','ins'];
+const ORDEM_PADRAO={lojaVN:{campo:'',dir:''},lojaVD:{campo:'',dir:''},
+  vendedor:{campo:'',dir:''},canais:{campo:'',dir:''}};
 
 const vazio=()=>{
   const o={};
@@ -595,12 +677,15 @@ const vazio=()=>{
 const PADRAO={
   manual:{},
   config:Object.assign({rotuloMes:'Agosto 2026 · Geely',tamanhoSlide:'pequeno',mostrarVazias:false,lojas:LOJAS_PADRAO.slice(),
-    linkVendas:LINK_VENDAS_PADRAO,abaVendas:'',urlDrive:'',autoDrive:false},
+    linkVendas:LINK_VENDAS_PADRAO,abaVendas:'',urlDrive:'',autoDrive:false,
+    filtroVendedor:{dep:'',praca:'',loja:''},
+    ordem:JSON.parse(JSON.stringify(ORDEM_PADRAO))},
     (function(){const i=mapaInicial(), e=mapaEventoInicial();
       const v=mapaDepVendaInicial();
       return {mapaMidia:i.mapa,rotulosMidia:i.rotulos,mapaEvento:e.mapa,rotulosEvento:e.rotulos,
         mapaDepVenda:v.mapa,rotulosDepVenda:v.rotulos};})()),
   dados:vazio(),
+  vendedores:{},
   fontes:{}
 };
 /* loja|dep marcados aqui têm as vendas digitadas à mão, e a importação não as sobrescreve */
@@ -647,6 +732,7 @@ async function buscar(k){
 async function salvarTudo(quieto){
   await guardar('config',estado.config);
   await guardar('dados',estado.dados);
+  await guardar('vendedores',estado.vendedores||{});
   await guardar('manual',estado.manual||{});
   await guardar('fontes',estado.fontes);
   await guardar('historico',historico);
@@ -656,6 +742,7 @@ async function salvarTudo(quieto){
 async function carregarTudo(){
   const c=await buscar('config'),d=await buscar('dados'),f=await buscar('fontes'),h=await buscar('historico');
   const mv=await buscar('manual'); estado.manual=(mv&&typeof mv==='object')?mv:{};
+  const vd=await buscar('vendedores'); estado.vendedores=(vd&&typeof vd==='object')?vd:{};
   /* chaves antigas eram loja|dep e valiam só para vendas */
   Object.keys(estado.manual).forEach(k=>{
     if(k.split('|').length===2){ estado.manual[k+'|vd']=true; delete estado.manual[k]; }
@@ -665,6 +752,11 @@ async function carregarTudo(){
   migrarMapa();
   /* o descarte por motivo saiu do painel: limpa o que ficou gravado */
   delete estado.config.filtros; delete estado.config.motivosFora;
+  if(!estado.config.filtroVendedor) estado.config.filtroVendedor={dep:'',praca:'',loja:''};
+  if(!estado.config.ordem) estado.config.ordem=JSON.parse(JSON.stringify(ORDEM_PADRAO));
+  ['lojaVN','lojaVD','vendedor','canais'].forEach(k=>{
+    if(!estado.config.ordem[k]) estado.config.ordem[k]={campo:'',dir:''};
+  });
   if(d) estado.dados=normalizar(d);
   if(f&&typeof f==='object') estado.fontes=f;
   if(Array.isArray(h)) historico=h;
@@ -741,6 +833,13 @@ const lojasComDado=()=>lojasAtivas().filter(n=>temDado([n]));
 
 /* ============ tabela no formato da planilha ============ */
 const ETAPAS_TAB=[['ent','Entrantes'],['ag','Agendados'],['fl','Fluxo'],['vd','Vendas'],['ft','Faturados']];
+function _extCanal(l,campo){
+  if(campo==='canal') return l.canal||'';
+  if(campo==='conv')  return l.c.temEnt?l.c.conv:-1;
+  const p=campo.split('_');
+  if(p.length===2 && l.c[p[1]]) return +l.c[p[1]][p[0]]||0;
+  return 0;
+}
 function tabelaCanais(lojas){
   const geral=celula(lojas,CANAIS);
   const usados=CANAIS.filter(m=>{
@@ -758,15 +857,26 @@ function tabelaCanais(lojas){
        (c.temEnt?fmtPct(c.conv):'—')+'</td></tr>';
     return h;
   };
-  let corpo='';
-  usados.forEach(m=>{ corpo+=linha(m,celula(lojas,[m]),false); });
+  const ord=(estado.config.ordem||{}).canais||{campo:'',dir:''};
+  const linhas=usados.map(m=>({canal:m,c:celula(lojas,[m])}));
+  const linhasOrd=ordenarLinhas(linhas,ord,_extCanal);
+  const corpo=linhasOrd.map(l=>linha(l.canal,l.c,false)).join('');
+  const T=(c,r,extra)=>thOrd('canais',c,r,extra).replace('<th','<th rowspan="2"');
+  const S=(c,r,extra)=>thOrd('canais',c,r,extra);
+  const sup = ETAPAS_TAB.map(e=>'<th colspan="2">'+e[1]+'</th>').join('');
+  const subs = ETAPAS_TAB.map(e=>S(e[0]+'_vn','VN',' dep')+S(e[0]+'_vd','VDA',' dep')).join('');
   return '<table><thead>'+
-    '<tr><th class="canal" rowspan="2">Canal</th>'+
-    ETAPAS_TAB.map(e=>'<th colspan="2">'+e[1]+'</th>').join('')+
-    '<th rowspan="2">%conv.</th></tr>'+
-    '<tr class="sub">'+ETAPAS_TAB.map(()=>'<th class="dep">VN</th><th class="dep">VDA</th>').join('')+'</tr>'+
+    '<tr>'+T('canal','Canal',' canal')+sup+T('conv','%conv.')+'</tr>'+
+    '<tr class="sub">'+subs+'</tr>'+
     '</thead><tbody>'+corpo+'</tbody>'+
     '<tfoot>'+linha('Total',geral,true)+'</tfoot></table>';
+}
+function _ligarOrdemCanais(root){
+  root.querySelectorAll('th.ordenavel').forEach(th=>{
+    th.addEventListener('click',()=>trocarOrdem('canais',th.dataset.ordem,()=>{
+      desenharGeral(); desenharLojas();
+    }));
+  });
 }
 function desenharGeral(){
   const lojas=lojasComDado();
@@ -778,9 +888,12 @@ function desenharGeral(){
     return;
   }
   alvo.innerHTML=tabelaCanais(lojas);
+  _ligarOrdemCanais(alvo);
   const c=celula(lojas,CANAIS);
+  const ord=(estado.config.ordem||{}).canais||{campo:'',dir:''};
   document.getElementById('selo-geral').textContent=
-    rotuloAtivo()+' · '+lojas.length+' loja(s) · '+fmtNum(c.total.ent)+' entrantes';
+    rotuloAtivo()+' · '+lojas.length+' loja(s) · '+fmtNum(c.total.ent)+' entrantes'+
+    (ord.campo?' · ordenada por '+ord.campo+' '+ord.dir:'');
   document.getElementById('dica-geral').innerHTML=
     'Entrantes saem da coluna <b>Fluxo Total Dia</b> do relatório, agendados de <b>Cli. Agendados</b>, '+
     'fluxo da soma de <b>Comp. Agendado</b> com <b>Comp. Não Agendado</b> e vendas de <b>Vendidos</b>. '+
@@ -804,6 +917,7 @@ function desenharLojas(){
   }).join('');
   alvo.querySelectorAll('[data-slide]').forEach(b=>b.addEventListener('click',()=>gerarSlide(b.dataset.slide)));
   alvo.querySelectorAll('[data-copiar]').forEach(b=>b.addEventListener('click',()=>copiarTabela(b.dataset.copiar)));
+  _ligarOrdemCanais(alvo);
 }
 
 /* ============ placar e filtro ============ */
@@ -870,7 +984,8 @@ const FONTES=[
   {k:'ag',  rot:'Agendados', arq:'Cli. Agendados'},
   {k:'cAg', rot:'Fluxo · comparecidos agendados', arq:'Comp. Agendado'},
   {k:'cNao',rot:'Fluxo · comparecidos não agendados', arq:'Comp. Não Agendado'},
-  {k:'vd',  rot:'Vendas e faturados', arq:'Vendas Leads Geely'}];
+  {k:'vd',  rot:'Vendas e faturados', arq:'Vendas Leads Geely'},
+  {k:'ins', rot:'Insucessos', arq:'Mergulho por Empresa · Insucesso'}];
 const fonteDe=k=>FONTES.find(f=>f.k===k)||FONTES[0];
 /* O departamento vem do TIPO DE EVENTO, coluna E do relatório, e não mais do
    vendedor. Cada tipo é direcionado no bloco "Tipo de evento e departamento".
@@ -989,7 +1104,7 @@ async function receberArquivos(lista,fonte){
 /* conta as linhas por loja, canal e departamento */
 function processarItem(it){
   const cfg=fonteDe(it.fonte);
-  const res={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, eventos={};
+  const res={}, resEnc={}, resVend={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, eventos={};
   let linhas=0, semLoja=0, semDep=0;
   for(let i=it.cab+1;i<it.matriz.length;i++){
     const l=it.matriz[i]; if(!l) continue;
@@ -1017,9 +1132,24 @@ function processarItem(it){
     res[loja]=res[loja]||{};
     res[loja][dep]=res[loja][dep]||{};
     res[loja][dep][canal]=(res[loja][dep][canal]||0)+1;
+    /* Encaminhados: na Geely todo lead que entra na conta já tem evento válido,
+       então enc = ent sempre; o campo é mantido para paridade com a Renault */
+    if(it.fonte==='ent'){
+      resEnc[loja]=resEnc[loja]||{};
+      resEnc[loja][dep]=resEnc[loja][dep]||{};
+      resEnc[loja][dep][canal]=(resEnc[loja][dep][canal]||0)+1;
+    }
+    /* Por vendedor: usa o nome cru como chave (quando a coluna existe) */
+    const nomeVend=it.colunas.vendedor>=0 ? String(l[it.colunas.vendedor]==null?'':l[it.colunas.vendedor]).trim() : '';
+    if(nomeVend){
+      resVend[loja]=resVend[loja]||{};
+      resVend[loja][nomeVend]=resVend[loja][nomeVend]||{dep:dep};
+      resVend[loja][nomeVend][it.fonte]=(resVend[loja][nomeVend][it.fonte]||0)+1;
+      if(it.fonte==='ent') resVend[loja][nomeVend].enc=(resVend[loja][nomeVend].enc||0)+1;
+    }
   }
   const lojas=Object.keys(res);
-  return {res,lojas,tipos,naoMapeados,naoRec,pendentes,eventos,semDep,linhas,semLoja};
+  return {res,resEnc,resVend,lojas,tipos,naoMapeados,naoRec,pendentes,eventos,semDep,linhas,semLoja};
 }
 /* arquivo de uma loja só preserva as outras; arquivo do grupo zera quem não veio */
 function alvosDoArquivo(presentes){
@@ -1186,11 +1316,28 @@ async function gravarImportacao(historicar){
           CANAIS.forEach(m=>{ estado.dados[n][d.k][m][campo]=((((rv.res[n]||{})[d.k]||{})[m])||{})[campo]||0; });
         });
       }));
-      estado.fontes.vd={arquivo:it.nome,quando:new Date().toISOString(),linhas:rv.linhas-rv.foraDoMes,
+      /* vendedores: zera vd/ft dos vendedores das lojas que vieram e aplica */
+      estado.vendedores=estado.vendedores||{};
+      alvosV.forEach(n=>{
+        estado.vendedores[n]=estado.vendedores[n]||{};
+        Object.keys(estado.vendedores[n]).forEach(v=>{
+          estado.vendedores[n][v].vd=0;
+          estado.vendedores[n][v].ft=0;
+        });
+        Object.keys(rv.resVend[n]||{}).forEach(v=>{
+          const novo=rv.resVend[n][v];
+          estado.vendedores[n][v]=estado.vendedores[n][v]||{dep:novo.dep};
+          estado.vendedores[n][v].dep=novo.dep;
+          estado.vendedores[n][v].vd=novo.vd||0;
+          estado.vendedores[n][v].ft=novo.ft||0;
+        });
+      });
+      const vendasContadas=rv.linhas-rv.semDep-rv.semLoja;
+      estado.fontes.vd={arquivo:it.nome,quando:new Date().toISOString(),linhas:vendasContadas,
         lojas:alvosV,etapa:'Vendas e faturados · '+it.aba};
       if(historicar) historico.push({quando:new Date().toISOString(),arquivo:it.nome+' · '+it.aba,
-        resumo:'Vendas e faturados · vendas '+fmtNum(rv.linhas-rv.foraDoMes-rv.semDep)+' · faturados '+fmtNum(rv.faturados)+
-          (rv.fatOutroMes?' (sendo '+fmtNum(rv.fatOutroMes)+' de meses anteriores)':'')+' · '+alvosV.length+' loja(s)'});
+        resumo:'Vendas e faturados · vendas '+fmtNum(vendasContadas)+' · faturados '+fmtNum(rv.faturados)+
+          ' · '+alvosV.length+' loja(s)'});
       return;
     }
     const cfg=fonteDe(it.fonte), r=processarItem(it);
@@ -1199,8 +1346,28 @@ async function gravarImportacao(historicar){
     alvos.forEach(n=>DEPS.forEach(d=>{
       /* etapa lançada à mão não é sobrescrita pela importação */
       if(travado(n,d.k,campo)){ mantidas.push(n+' · '+d.rot+' · '+campo); return; }
-      CANAIS.forEach(m=>{ estado.dados[n][d.k][m][it.fonte]=(((r.res[n]||{})[d.k]||{})[m])||0; });
+      CANAIS.forEach(m=>{
+        estado.dados[n][d.k][m][it.fonte]=(((r.res[n]||{})[d.k]||{})[m])||0;
+        if(it.fonte==='ent')
+          estado.dados[n][d.k][m].enc=(((r.resEnc[n]||{})[d.k]||{})[m])||0;
+      });
     }));
+    /* vendedores: zera o campo desta fonte em cada loja alvo, depois aplica */
+    estado.vendedores=estado.vendedores||{};
+    alvos.forEach(n=>{
+      estado.vendedores[n]=estado.vendedores[n]||{};
+      Object.keys(estado.vendedores[n]).forEach(v=>{
+        estado.vendedores[n][v][it.fonte]=0;
+        if(it.fonte==='ent') estado.vendedores[n][v].enc=0;
+      });
+      Object.keys(r.resVend[n]||{}).forEach(v=>{
+        const novo=r.resVend[n][v];
+        estado.vendedores[n][v]=estado.vendedores[n][v]||{dep:novo.dep};
+        estado.vendedores[n][v].dep=novo.dep;
+        estado.vendedores[n][v][it.fonte]=novo[it.fonte]||0;
+        if(it.fonte==='ent') estado.vendedores[n][v].enc=novo.enc||0;
+      });
+    });
     estado.fontes[it.fonte]={arquivo:it.nome,quando:new Date().toISOString(),
       linhas:r.linhas,lojas:alvos,etapa:cfg.rot};
     const t=dep=>alvos.reduce((a,n)=>a+CANAIS.reduce((b,m)=>b+((((r.res[n]||{})[dep]||{})[m])||0),0),0);
@@ -1220,7 +1387,7 @@ async function gravarImportacao(historicar){
 /* campo 'fl' é a soma dos dois comparecidos: digitado à mão, vai todo em flAg */
 const MANUAL_CAMPOS=[{k:'ent',rot:'Entrantes'},{k:'ag',rot:'Agendados'},{k:'fl',rot:'Fluxo'},
   {k:'vd',rot:'Vendas'},{k:'ft',rot:'Faturados'}];
-const CAMPO_DA_FONTE={ent:'ent',ag:'ag',cAg:'fl',cNao:'fl',vd:'vd',ft:'ft'};
+const CAMPO_DA_FONTE={ent:'ent',ag:'ag',cAg:'fl',cNao:'fl',vd:'vd',ft:'ft',ins:'ins'};
 let lojaManual=null;
 function valorManual(loja,dep,canal,campo){
   const r=(((estado.dados[loja]||{})[dep]||{})[canal])||{};
@@ -1332,17 +1499,32 @@ function ehPlanilhaVendas(matriz){
   return l.some(c=>chave(c)==='midia') && l.some(c=>chave(c)==='nf');
 }
 /* a aba do mês corrente, aceitando SETEMBRO2026 e SETEMBRO/2026 */
+/* Regra Geely: toda linha preenchida (data, cliente ou vendedor) conta como VENDA;
+   FATURADO conta quando a coluna NF estiver preenchida (qualquer valor — número,
+   texto como "FATURADO", "Falta doc", etc. — basta não estar vazio). */
+function nfPreenchida(v){
+  if(v==null) return false;
+  return String(v).trim()!=='';
+}
+function linhaTemDado(l,cData,cCli,cVend){
+  const temAlgo=i=>i>=0 && l[i]!=null && String(l[i]).trim()!=='';
+  return temAlgo(cData)||temAlgo(cCli)||temAlgo(cVend);
+}
 function processarVendas(it){
   const alvo=mesDaAba(it.aba)||{mes:0,ano:0};
   const titulos=linhasTitulo(it.matriz);
-  const res={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, deps={}, lojasVistas=[], blocoSemLoja={};
-  let linhas=0, foraDoMes=0, fatOutroMes=0, semData=0, semDep=0, semLoja=0, faturados=0;
+  const res={}, resVend={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, deps={}, lojasVistas=[], blocoSemLoja={};
+  let linhas=0, semDep=0, semLoja=0, faturados=0, semNF=0;
   titulos.forEach((ini,j)=>{
     const fim = j+1<titulos.length ? titulos[j+1] : it.matriz.length;
     const cab=it.matriz[ini]||[];
     const idx=alvos=>{ for(let i=0;i<cab.length;i++){ if(alvos.indexOf(chave(cab[i]))>=0) return i; } return -1; };
     const cLoja=idx(['loja','empresa']), cData=idx(['datadavenda']), cNF=idx(['nf']),
-          cMidia=idx(['midia']), cDep=idx(['pfvd','pfpj','departamento']);
+          cMidia=idx(['midia']),
+          /* uma coluna só para o departamento, qualquer que seja o nome do cabeçalho —
+             o painel reconhece os valores VN (veículos novos) e VD (venda direta) direto */
+          cDep=idx(['departamento','dep','pfvd','pfpj','vnvd','vdvn']),
+          cVend=idx(['vendedor']), cCli=idx(['cliente']);
     /* abas antigas não têm coluna LOJA: nelas o nome está no título do bloco */
     let lojaDoBloco=null;
     if(cLoja<0){
@@ -1351,20 +1533,19 @@ function processarVendas(it){
         if(!t||chave(t)==='datadavenda') continue;
         const achou=acharLoja(t);
         if(achou){ lojaDoBloco=achou; break; }
-        if(!blocoSemLoja[t] && chave(t).length>2 && ['nf','midia','evento','cliente','telefone','modelo','vendedor','status','pfpj','pfvd'].indexOf(chave(t))<0)
+        if(!blocoSemLoja[t] && chave(t).length>2 && ['nf','midia','evento','cliente','telefone','modelo','vendedor','status','pfpj','pfvd','departamento','dep','consultores'].indexOf(chave(t))<0)
           blocoSemLoja[t]=0;
       }
     }
     for(let i=ini+1;i<fim;i++){
       const l=it.matriz[i]; if(!l) continue;
-      const d=dataDaVenda(l[cData]);
-      if(!d){ if(l.some((c,ci)=>ci>1&&String(c==null?'':c).trim()!=='')) semData++; continue; }
+      if(!linhaTemDado(l,cData,cCli,cVend)) continue;
       linhas++;
-      const noMes=(d.mes===alvo.mes&&d.ano===alvo.ano);
-      const temNF=cNF>=0 && String(l[cNF]==null?'':l[cNF]).trim()!=='';
-      /* venda é só do mês da aba; faturado é toda linha com NF, de qualquer mês */
-      if(!noMes){ foraDoMes++; if(!temNF) continue; fatOutroMes++; }
-      /* a loja vem da coluna LOJA, uma por linha */
+      /* Qualquer coisa preenchida na NF conta como faturado */
+      const nfRaw=cNF>=0?l[cNF]:null;
+      const temNF=nfPreenchida(nfRaw);
+      if(!temNF) semNF++;
+      /* a loja vem da coluna LOJA (nova) ou do título do bloco (antigo) */
       const cruLoja=cLoja>=0?l[cLoja]:'';
       const loja=cLoja>=0?acharLoja(cruLoja):lojaDoBloco;
       if(!loja){
@@ -1379,19 +1560,42 @@ function processarVendas(it){
       tipos[cru]=(tipos[cru]||0)+1;
       const canal=canalDe(cru);
       if(canal===SEM_CLASSE) naoMapeados[cru]=(naoMapeados[cru]||0)+1;
-      const q=depDaVenda(cDep>=0?l[cDep]:'');
-      deps[q.rot]=(deps[q.rot]||0)+1;
-      if(!q.dep){ pendentes[q.rot]=(pendentes[q.rot]||0)+1; semDep++; continue; }
+      /* departamento: VN (veículos novos) ou VD (venda direta) direto na coluna;
+         valores legados (PF/PJ etc.) ainda caem no mapaDepVenda da Geely */
+      let depKey=null, rotPend='';
+      if(cDep>=0){
+        const bruto=String(l[cDep]==null?'':l[cDep]).trim();
+        const d=chave(bruto);
+        if(d==='vn'||d==='gvn'||d==='veiculonovos'||d==='veiculosnovos') depKey='vn';
+        else if(d==='vd'||d==='vda'||d==='vendadireta') depKey='vd';
+        else {
+          const q=depDaVenda(bruto);
+          if(q.dep) depKey=q.dep;
+          else rotPend=bruto||'(departamento em branco)';
+        }
+      }
+      if(depKey) deps[depKey==='vn'?'VN':'VDA']=(deps[depKey==='vn'?'VN':'VDA']||0)+1;
+      else { deps[rotPend]=(deps[rotPend]||0)+1; pendentes[rotPend]=(pendentes[rotPend]||0)+1; semDep++; continue; }
       res[loja]=res[loja]||{};
-      res[loja][q.dep]=res[loja][q.dep]||{};
-      res[loja][q.dep][canal]=res[loja][q.dep][canal]||{vd:0,ft:0};
-      if(noMes) res[loja][q.dep][canal].vd++;
-      if(temNF){ res[loja][q.dep][canal].ft++; faturados++; }
+      res[loja][depKey]=res[loja][depKey]||{};
+      res[loja][depKey][canal]=res[loja][depKey][canal]||{vd:0,ft:0};
+      /* toda linha preenchida = venda; NF preenchida (qualquer valor) adiciona faturado */
+      res[loja][depKey][canal].vd++;
+      if(temNF){ res[loja][depKey][canal].ft++; faturados++; }
+      /* por vendedor (se a coluna existir e tiver nome) */
+      const nomeVend=cVend>=0?String(l[cVend]==null?'':l[cVend]).trim():'';
+      if(nomeVend){
+        resVend[loja]=resVend[loja]||{};
+        resVend[loja][nomeVend]=resVend[loja][nomeVend]||{dep:depKey,vd:0,ft:0};
+        resVend[loja][nomeVend].dep=depKey;
+        resVend[loja][nomeVend].vd++;
+        if(temNF) resVend[loja][nomeVend].ft++;
+      }
     }
   });
   Object.keys(blocoSemLoja).forEach(k=>{ if(blocoSemLoja[k]) naoRec[k]=(naoRec[k]||0)+blocoSemLoja[k]; });
-  return {res,lojas:lojasVistas,tipos,naoMapeados,naoRec,pendentes,deps,
-    linhas,foraDoMes,fatOutroMes,semData,semDep,semLoja,faturados,alvo};
+  return {res,resVend,lojas:lojasVistas,tipos,naoMapeados,naoRec,pendentes,deps,
+    linhas,semDep,semLoja,faturados,semNF,alvo};
 }
 
 /* ============ vendas pelo Google Sheets ============ */
@@ -1468,14 +1672,18 @@ function explicaDrive(status){
   return 'o app respondeu '+status+'.';
 }
 function pacoteBackup(){
-  return {versao:3,painel:'midia-geely',gerado:new Date().toISOString(),
-    config:estado.config,dados:estado.dados,manual:estado.manual,fontes:estado.fontes,historico};
+  return {versao:4,painel:'midia-geely',gerado:new Date().toISOString(),
+    config:estado.config,dados:estado.dados,vendedores:estado.vendedores||{},
+    manual:estado.manual,fontes:estado.fontes,historico};
 }
 async function aplicarPacote(o){
   if(!o||!o.dados) throw new Error('backup sem dados');
   estado.config=Object.assign({},PADRAO.config,o.config||{});
   aplicarLojas(estado.config.lojas);
+  if(!estado.config.filtroVendedor) estado.config.filtroVendedor={dep:'',praca:'',loja:''};
+  if(!estado.config.ordem) estado.config.ordem=JSON.parse(JSON.stringify(ORDEM_PADRAO));
   estado.dados=normalizar(o.dados);
+  estado.vendedores=(o.vendedores&&typeof o.vendedores==='object')?o.vendedores:{};
   estado.manual=(o.manual&&typeof o.manual==='object')?o.manual:{};
   estado.fontes=o.fontes||{};
   historico=Array.isArray(o.historico)?o.historico:[];
@@ -2083,6 +2291,12 @@ function slideDe(tipo){
     return {titulo:'Slide · '+n,secao:null,
       fn:slideCanais([n],'LEADS POR MÍDIA - '+n,pracaDe(n)+' - '+mesDoPainel())};
   }
+  if(tipo==='funil-vn'){
+    return {titulo:'Slide · funil VN por loja',secao:'aba-loja',fn:slideFunil('vn')};
+  }
+  if(tipo==='funil-vd'){
+    return {titulo:'Slide · funil VDA por loja',secao:'aba-loja',fn:slideFunil('vd')};
+  }
   return null;
 }
 async function gerarSlide(tipo){
@@ -2098,7 +2312,9 @@ async function gerarSlide(tipo){
   cfg.fn(ctx,cv.width,cv.height);
   document.getElementById('titulo-slide').firstChild.textContent=cfg.titulo+' ';
   const bloco=document.getElementById('bloco-slide');
-  document.getElementById('aba-canais').appendChild(bloco);
+  /* o bloco é movido para a aba de origem do slide, assim o preview aparece ali mesmo */
+  const destino=document.getElementById(cfg.secao||'aba-canais') || document.getElementById('aba-canais');
+  destino.appendChild(bloco);
   bloco.hidden=false;
   if(bloco.scrollIntoView) bloco.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -2141,9 +2357,343 @@ function baixar(nome,conteudo,tipo){
   const b=new Blob([conteudo],{type:tipo});
   const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=nome; a.click(); URL.revokeObjectURL(a.href);
 }
+/* ============ utilidades de ordenação de tabelas ============ */
+function cicloOrdem(ord,campo){
+  if(!ord||ord.campo!==campo) return {campo,dir:'desc'};
+  if(ord.dir==='desc') return {campo,dir:'asc'};
+  return {campo:'',dir:''};
+}
+function ordenarLinhas(linhas,ord,extrator){
+  if(!ord||!ord.campo) return linhas;
+  const mult=ord.dir==='asc'?1:-1;
+  return linhas.slice().sort((a,b)=>{
+    const va=extrator(a,ord.campo), vb=extrator(b,ord.campo);
+    if(typeof va==='string'||typeof vb==='string')
+      return String(va||'').localeCompare(String(vb||''),'pt-BR')*mult;
+    return ((+va||0)-(+vb||0))*mult;
+  });
+}
+function thOrd(tabela,campo,rot,extra){
+  const ord=(estado.config.ordem||{})[tabela]||{};
+  const ativa=ord.campo===campo;
+  const seta=ativa?(ord.dir==='asc'?'▲':'▼'):'';
+  const cls='ordenavel'+(ativa?' ativa':'')+(extra||'');
+  return '<th class="'+cls+'" data-tabela="'+tabela+'" data-ordem="'+campo+'"'+
+    (ativa?' data-seta="'+seta+'"':'')+'>'+rot+'</th>';
+}
+async function trocarOrdem(tabela,campo,callback){
+  estado.config.ordem=estado.config.ordem||JSON.parse(JSON.stringify(ORDEM_PADRAO));
+  estado.config.ordem[tabela]=cicloOrdem(estado.config.ordem[tabela],campo);
+  await guardar('config',estado.config);
+  callback();
+}
+async function resetarOrdem(tabela,callback){
+  estado.config.ordem=estado.config.ordem||JSON.parse(JSON.stringify(ORDEM_PADRAO));
+  estado.config.ordem[tabela]={campo:'',dir:''};
+  await guardar('config',estado.config);
+  callback();
+}
+
+/* ============ Relatório por loja / praça ============ */
+function _celLojaDep(lojas,dk){
+  const t={ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
+  lojas.forEach(n=>CANAIS.forEach(m=>{
+    const r=(((estado.dados[n]||{})[dk]||{})[m])||{};
+    t.ent+=+r.ent||0; t.enc+=+r.enc||0; t.ag+=+r.ag||0;
+    t.fl+=(+r.cAg||0)+(+r.cNao||0); t.vd+=+r.vd||0; t.ft+=+r.ft||0;
+  }));
+  return t;
+}
+function _linhaRelLoja(rot,t){
+  const pEnc=pct(t.enc,t.ent), pAg=pct(t.ag,t.ent), pFl=pct(t.fl,t.ag),
+        pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
+        pFF=pct(t.ft,t.fl), pFE=pct(t.ft,t.ent);
+  const cls=p=>p>=0.5?'pct-alto':(p>=0.25?'pct-medio':'pct-baixo');
+  return '<tr><th>'+rot+'</th>'+
+    '<td class="'+(t.ent?'':'zero')+'">'+fmtNum(t.ent)+'</td>'+
+    '<td class="'+(t.enc?'':'zero')+'">'+fmtNum(t.enc)+'</td>'+
+    '<td class="'+(t.ent?cls(pEnc):'zero')+'">'+(t.ent?fmtPct(pEnc):'—')+'</td>'+
+    '<td class="'+(t.ag?'':'zero')+'">'+fmtNum(t.ag)+'</td>'+
+    '<td class="'+(t.ent?cls(pAg):'zero')+'">'+(t.ent?fmtPct(pAg):'—')+'</td>'+
+    '<td class="'+(t.fl?'':'zero')+'">'+fmtNum(t.fl)+'</td>'+
+    '<td class="'+(t.ag?cls(pFl):'zero')+'">'+(t.ag?fmtPct(pFl):'—')+'</td>'+
+    '<td class="'+(t.vd?'':'zero')+'">'+fmtNum(t.vd)+'</td>'+
+    '<td class="'+(t.fl?cls(pVF):'zero')+'">'+(t.fl?fmtPct(pVF):'—')+'</td>'+
+    '<td class="'+(t.ent?cls(pVE):'zero')+'">'+(t.ent?fmtPct(pVE):'—')+'</td>'+
+    '<td class="'+(t.ft?'':'zero')+'">'+fmtNum(t.ft)+'</td>'+
+    '<td class="'+(t.fl?cls(pFF):'zero')+'">'+(t.fl?fmtPct(pFF):'—')+'</td>'+
+    '<td class="'+(t.ent?cls(pFE):'zero')+'">'+(t.ent?fmtPct(pFE):'—')+'</td></tr>';
+}
+function _cabRelLoja(primeira,tabela){
+  const T=(c,r)=>thOrd(tabela,c,r).replace('<th','<th rowspan="2"');
+  const S=(c,r)=>thOrd(tabela,c,r);
+  return '<thead>'+
+    '<tr>'+T('nome',primeira)+T('ent','Entrantes')+
+    '<th colspan="2">Encaminhados</th><th colspan="2">Agendados</th>'+
+    '<th colspan="2">Fluxo</th><th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
+    '<tr class="sub">'+
+      S('enc','Total')+S('pct_enc','vs entrantes')+
+      S('ag','Total')+S('pct_ag','vs entrantes')+
+      S('fl','Total')+S('pct_fl','vs agendados')+
+      S('vd','Total')+S('pct_vf','vs fluxo')+S('pct_ve','vs entrantes')+
+      S('ft','Total')+S('pct_ff','vs fluxo')+S('pct_fe','vs entrantes')+
+    '</tr></thead>';
+}
+function _extLoja(l,campo){
+  if(campo==='nome') return l._rot||'';
+  if(campo==='pct_enc') return l.ent?l.enc/l.ent:-1;
+  if(campo==='pct_ag')  return l.ent?l.ag/l.ent:-1;
+  if(campo==='pct_fl')  return l.ag?l.fl/l.ag:-1;
+  if(campo==='pct_vf')  return l.fl?l.vd/l.fl:-1;
+  if(campo==='pct_ve')  return l.ent?l.vd/l.ent:-1;
+  if(campo==='pct_ff')  return l.fl?l.ft/l.fl:-1;
+  if(campo==='pct_fe')  return l.ent?l.ft/l.ent:-1;
+  return +l[campo]||0;
+}
+function desenharRelatorioLoja(){
+  const alvo1=document.getElementById('tabela-loja-vn');
+  const alvo2=document.getElementById('tabela-loja-vd');
+  if(!alvo1||!alvo2) return;
+  const ordVN=(estado.config.ordem||{}).lojaVN||{campo:'',dir:''};
+  const ordVD=(estado.config.ordem||{}).lojaVD||{campo:'',dir:''};
+  const linhasVN=NOMES.map(n=>{ const t=_celLojaDep([n],'vn'); t._rot=n; return t; });
+  const totVN={_rot:'EUROVIA GEELY',ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
+  linhasVN.forEach(t=>['ent','enc','ag','fl','vd','ft'].forEach(k=>totVN[k]+=t[k]));
+  const corpoVN=ordenarLinhas(linhasVN,ordVN,_extLoja).map(t=>_linhaRelLoja(t._rot,t)).join('');
+  alvo1.innerHTML='<table>'+_cabRelLoja('Loja','lojaVN')+'<tbody>'+corpoVN+'</tbody>'+
+    '<tfoot>'+_linhaRelLoja('EUROVIA GEELY',totVN).replace('<tr>','<tr class="total">')+'</tfoot></table>';
+  document.getElementById('selo-loja-vn').textContent=
+    fmtNum(totVN.ent)+' entrantes · '+fmtNum(totVN.vd)+' vendas · '+fmtNum(totVN.ft)+' faturados'+
+    (ordVN.campo?' · ordenada por '+ordVN.campo+' '+ordVN.dir:'');
+  const linhasVD=NOMES.map(n=>{ const t=_celLojaDep([n],'vd'); t._rot=n; return t; });
+  const totVD={_rot:'EUROVIA GEELY',ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
+  linhasVD.forEach(t=>['ent','enc','ag','fl','vd','ft'].forEach(k=>totVD[k]+=t[k]));
+  const corpoVD=ordenarLinhas(linhasVD,ordVD,_extLoja).map(t=>_linhaRelLoja(t._rot,t)).join('');
+  alvo2.innerHTML='<table>'+_cabRelLoja('Loja','lojaVD')+'<tbody>'+corpoVD+'</tbody>'+
+    '<tfoot>'+_linhaRelLoja('EUROVIA GEELY',totVD).replace('<tr>','<tr class="total">')+'</tfoot></table>';
+  document.getElementById('selo-loja-vd').textContent=
+    fmtNum(totVD.ent)+' entrantes · '+fmtNum(totVD.vd)+' vendas · '+fmtNum(totVD.ft)+' faturados'+
+    (ordVD.campo?' · ordenada por '+ordVD.campo+' '+ordVD.dir:'');
+  [alvo1,alvo2].forEach(el=>el.querySelectorAll('th.ordenavel').forEach(th=>{
+    th.addEventListener('click',()=>trocarOrdem(th.dataset.tabela,th.dataset.ordem,desenharRelatorioLoja));
+  }));
+}
+function copiarRelLoja(dep){
+  const linhas=[['Loja','Entrantes','Encaminhados','% Enc','Agendados','% Ag','Fluxo','% Fluxo',
+    'Venda','% V/Fluxo','% V/Ent.','Faturados','% F/Fluxo','% F/Ent.']];
+  const tot={ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
+  const addRow=(rot,t)=>linhas.push([rot,t.ent,t.enc,
+    t.ent?fmtPct(pct(t.enc,t.ent)):'',t.ag,t.ent?fmtPct(pct(t.ag,t.ent)):'',
+    t.fl,t.ag?fmtPct(pct(t.fl,t.ag)):'',
+    t.vd,t.fl?fmtPct(pct(t.vd,t.fl)):'',t.ent?fmtPct(pct(t.vd,t.ent)):'',
+    t.ft,t.fl?fmtPct(pct(t.ft,t.fl)):'',t.ent?fmtPct(pct(t.ft,t.ent)):'']);
+  const dk = dep==='vn' ? 'vn' : 'vd';
+  NOMES.forEach(n=>{ const t=_celLojaDep([n],dk); addRow(n,t);
+    ['ent','enc','ag','fl','vd','ft'].forEach(k=>tot[k]+=t[k]); });
+  addRow('EUROVIA GEELY',tot);
+  const txt=linhas.map(l=>l.join('\t')).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>recado('recado-loja-'+dep,'Copiado'))
+    .catch(()=>recado('recado-loja-'+dep,'Não deu para copiar','var(--alerta)'));
+}
+
+/* ============ Relatório por vendedor ============ */
+function _lojasDoFiltro(){
+  const f=estado.config.filtroVendedor||{dep:'',praca:'',loja:''};
+  if(f.loja) return [f.loja];
+  if(f.praca) return (PRACA_LOJAS[f.praca]||[]).slice();
+  return NOMES.slice();
+}
+function _extVendedor(l,campo){
+  if(campo==='nome') return l.nome||'';
+  if(campo==='loja') return l.loja||'';
+  if(campo==='dep')  return l.dep||'';
+  if(campo==='pct_ag') return l.enc?l.ag/l.enc:-1;
+  if(campo==='pct_fl') return l.ag?l.fl/l.ag:-1;
+  if(campo==='pct_vf') return l.fl?l.vd/l.fl:-1;
+  if(campo==='pct_ve') return l.enc?l.vd/l.enc:-1;
+  if(campo==='pct_ff') return l.fl?l.ft/l.fl:-1;
+  if(campo==='pct_fe') return l.enc?l.ft/l.enc:-1;
+  if(campo==='pct_ie') return l.enc?l.ins/l.enc:-1;
+  return +l[campo]||0;
+}
+function _linhasVendedor(){
+  const f=estado.config.filtroVendedor||{dep:'',praca:'',loja:''};
+  const lojasOk=_lojasDoFiltro();
+  const out=[];
+  lojasOk.forEach(loja=>{
+    const vends=(estado.vendedores||{})[loja]||{};
+    Object.keys(vends).forEach(nome=>{
+      const v=vends[nome];
+      if(f.dep && v.dep!==f.dep) return;
+      const ent=+v.ent||0, enc=+v.enc||0, ag=+v.ag||0,
+            fl=(+v.cAg||0)+(+v.cNao||0), vd=+v.vd||0, ft=+v.ft||0, ins=+v.ins||0;
+      if(!ent && !enc && !ag && !fl && !vd && !ft && !ins) return;
+      out.push({loja,nome,dep:v.dep,ent,enc,ag,fl,vd,ft,ins});
+    });
+  });
+  const ord=(estado.config.ordem||{}).vendedor||{campo:'',dir:''};
+  if(ord.campo) return ordenarLinhas(out,ord,_extVendedor);
+  out.sort((a,b)=>b.vd-a.vd || b.fl-a.fl || b.enc-a.enc);
+  return out;
+}
+function desenharFiltrosVendedor(){
+  const f=estado.config.filtroVendedor||{dep:'',praca:'',loja:''};
+  const selDep=document.getElementById('filtro-vendedor-dep');
+  const selPraca=document.getElementById('filtro-vendedor-praca');
+  const selLoja=document.getElementById('filtro-vendedor-loja');
+  if(!selDep||!selPraca||!selLoja) return;
+  selDep.value=f.dep||'';
+  selPraca.innerHTML='<option value="">Todas</option>'+
+    PRACAS.map(p=>'<option value="'+p+'"'+(f.praca===p?' selected':'')+'>'+p+'</option>').join('');
+  const lojasDisp = f.praca ? (PRACA_LOJAS[f.praca]||[]) : NOMES;
+  selLoja.innerHTML='<option value="">Todas</option>'+
+    lojasDisp.map(n=>'<option value="'+n+'"'+(f.loja===n?' selected':'')+'>'+n+'</option>').join('');
+  if(f.loja && lojasDisp.indexOf(f.loja)<0){ f.loja=''; selLoja.value=''; }
+  const partes=[];
+  if(f.dep) partes.push(f.dep==='vn'?'VN':'VDA');
+  if(f.praca) partes.push(f.praca);
+  if(f.loja) partes.push(f.loja);
+  document.getElementById('selo-filtro-vendedor').textContent=
+    partes.length?partes.join(' · '):'sem filtro';
+}
+function desenharRelatorioVendedor(){
+  desenharFiltrosVendedor();
+  const alvo=document.getElementById('tabela-vendedor'); if(!alvo) return;
+  const linhas=_linhasVendedor();
+  if(!linhas.length){
+    alvo.innerHTML='<p class="dica">Nenhum vendedor com dado para o filtro atual.</p>';
+    document.getElementById('selo-vendedor').textContent='0 vendedor(es)';
+    return;
+  }
+  let corpo=''; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
+  /* para insucessos usamos a escala invertida: menos é melhor */
+  const cls=p=>p>=0.5?'pct-alto':(p>=0.25?'pct-medio':'pct-baixo');
+  const clsIns=p=>p>=0.5?'pct-baixo':(p>=0.25?'pct-medio':'pct-alto');
+  linhas.forEach(l=>{
+    const pAg=pct(l.ag,l.enc), pIE=pct(l.ins,l.enc), pFl=pct(l.fl,l.ag),
+          pVF=pct(l.vd,l.fl), pVE=pct(l.vd,l.enc),
+          pFF=pct(l.ft,l.fl), pFE=pct(l.ft,l.enc);
+    corpo+='<tr><th>'+l.loja+'</th><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
+      '<td class="'+(l.enc?'':'zero')+'">'+fmtNum(l.enc)+'</td>'+
+      '<td class="'+(l.ag?'':'zero')+'">'+fmtNum(l.ag)+'</td>'+
+      '<td class="'+(l.enc?cls(pAg):'zero')+'">'+(l.enc?fmtPct(pAg):'—')+'</td>'+
+      '<td class="'+(l.ins?'':'zero')+'">'+fmtNum(l.ins)+'</td>'+
+      '<td class="'+(l.enc?clsIns(pIE):'zero')+'">'+(l.enc?fmtPct(pIE):'—')+'</td>'+
+      '<td class="'+(l.fl?'':'zero')+'">'+fmtNum(l.fl)+'</td>'+
+      '<td class="'+(l.ag?cls(pFl):'zero')+'">'+(l.ag?fmtPct(pFl):'—')+'</td>'+
+      '<td class="'+(l.vd?'':'zero')+'">'+fmtNum(l.vd)+'</td>'+
+      '<td class="'+(l.fl?cls(pVF):'zero')+'">'+(l.fl?fmtPct(pVF):'—')+'</td>'+
+      '<td class="'+(l.enc?cls(pVE):'zero')+'">'+(l.enc?fmtPct(pVE):'—')+'</td>'+
+      '<td class="'+(l.ft?'':'zero')+'">'+fmtNum(l.ft)+'</td>'+
+      '<td class="'+(l.fl?cls(pFF):'zero')+'">'+(l.fl?fmtPct(pFF):'—')+'</td>'+
+      '<td class="'+(l.enc?cls(pFE):'zero')+'">'+(l.enc?fmtPct(pFE):'—')+'</td></tr>';
+    ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=l[k]);
+  });
+  const pAg=pct(tot.ag,tot.enc), pIE=pct(tot.ins,tot.enc), pFl=pct(tot.fl,tot.ag),
+        pVF=pct(tot.vd,tot.fl), pVE=pct(tot.vd,tot.enc),
+        pFF=pct(tot.ft,tot.fl), pFE=pct(tot.ft,tot.enc);
+  const rodape='<tr><th>TOTAL</th><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
+    '<td>'+fmtNum(tot.ag)+'</td><td>'+(tot.enc?fmtPct(pAg):'—')+'</td>'+
+    '<td>'+fmtNum(tot.ins)+'</td><td>'+(tot.enc?fmtPct(pIE):'—')+'</td>'+
+    '<td>'+fmtNum(tot.fl)+'</td><td>'+(tot.ag?fmtPct(pFl):'—')+'</td>'+
+    '<td>'+fmtNum(tot.vd)+'</td><td>'+(tot.fl?fmtPct(pVF):'—')+'</td>'+
+    '<td>'+(tot.enc?fmtPct(pVE):'—')+'</td>'+
+    '<td>'+fmtNum(tot.ft)+'</td><td>'+(tot.fl?fmtPct(pFF):'—')+'</td>'+
+    '<td>'+(tot.enc?fmtPct(pFE):'—')+'</td></tr>';
+  const T=(c,r)=>thOrd('vendedor',c,r).replace('<th','<th rowspan="2"');
+  const S=(c,r)=>thOrd('vendedor',c,r);
+  alvo.innerHTML='<table><thead><tr>'+T('loja','Loja')+T('dep','Dep')+
+    T('enc','Encaminhados')+'<th colspan="2">Agendados</th><th colspan="2">Insucessos</th>'+
+    '<th colspan="2">Fluxo</th><th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
+    '<tr class="sub">'+S('ag','Total')+S('pct_ag','vs encaminhados')+
+    S('ins','Total')+S('pct_ie','vs encaminhados')+
+    S('fl','Total')+S('pct_fl','vs agendados')+
+    S('vd','Total')+S('pct_vf','vs fluxo')+S('pct_ve','vs encaminhados')+
+    S('ft','Total')+S('pct_ff','vs fluxo')+S('pct_fe','vs encaminhados')+'</tr></thead>'+
+    '<tbody>'+corpo+'</tbody><tfoot>'+rodape+'</tfoot></table>';
+  const ord=(estado.config.ordem||{}).vendedor||{campo:'',dir:''};
+  document.getElementById('selo-vendedor').textContent=
+    fmtNum(linhas.length)+' vendedor(es) · '+fmtNum(tot.enc)+' encaminhados · '+fmtNum(tot.vd)+' vendas · '+
+    fmtNum(tot.ft)+' faturados · '+fmtNum(tot.ins)+' insucessos'+
+    (ord.campo?' · ordenada por '+ord.campo+' '+ord.dir:'');
+  alvo.querySelectorAll('th.ordenavel').forEach(th=>{
+    th.addEventListener('click',()=>trocarOrdem('vendedor',th.dataset.ordem,desenharRelatorioVendedor));
+  });
+}
+function copiarRelVendedor(){
+  const linhas=_linhasVendedor();
+  const cab=['Loja','Dep','Encaminhados','Agendados','% Ag','Insucessos','% Ins',
+    'Fluxo','% Fluxo','Venda','% V/Fluxo','% V/Enc.','Faturados','% F/Fluxo','% F/Enc.'];
+  const l=[cab]; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
+  linhas.forEach(r=>{
+    l.push([r.loja,r.dep==='vn'?'VN':'VDA',r.enc,
+      r.ag,r.enc?fmtPct(pct(r.ag,r.enc)):'',
+      r.ins,r.enc?fmtPct(pct(r.ins,r.enc)):'',
+      r.fl,r.ag?fmtPct(pct(r.fl,r.ag)):'',
+      r.vd,r.fl?fmtPct(pct(r.vd,r.fl)):'',r.enc?fmtPct(pct(r.vd,r.enc)):'',
+      r.ft,r.fl?fmtPct(pct(r.ft,r.fl)):'',r.enc?fmtPct(pct(r.ft,r.enc)):'']);
+    ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=r[k]);
+  });
+  l.push(['TOTAL','',tot.enc,
+    tot.ag,tot.enc?fmtPct(pct(tot.ag,tot.enc)):'',
+    tot.ins,tot.enc?fmtPct(pct(tot.ins,tot.enc)):'',
+    tot.fl,tot.ag?fmtPct(pct(tot.fl,tot.ag)):'',
+    tot.vd,tot.fl?fmtPct(pct(tot.vd,tot.fl)):'',tot.enc?fmtPct(pct(tot.vd,tot.enc)):'',
+    tot.ft,tot.fl?fmtPct(pct(tot.ft,tot.fl)):'',tot.enc?fmtPct(pct(tot.ft,tot.enc)):'']);
+  navigator.clipboard.writeText(l.map(r=>r.join('\t')).join('\n'))
+    .then(()=>recado('recado-vendedor','Copiado'))
+    .catch(()=>recado('recado-vendedor','Não deu para copiar','var(--alerta)'));
+}
+
+/* ============ Slide: funil de leads por loja/praça ============ */
+function slideFunil(dep){
+  const ehVN=dep==='vn';
+  const titulo='FUNIL DE LEADS - '+(ehVN?'VEÍCULOS NOVOS - VN':'VENDA DIRETA - VDA');
+  const sub='GEELY - '+mesDoPainel();
+  return function(ctx,W,H){
+    const area=molduraSlide(ctx,W,H,titulo,sub);
+    const cls=p=>p>=0.5?'ok':(p>=0.25?'atencao':'alerta');
+    const cols=[
+      {rot:'LOJA',esq:true},{rot:'ENTRANTES'},
+      {rot:'TOTAL',sup:'ENCAMINHADOS'},{rot:'%',sup:'ENCAMINHADOS'},
+      {rot:'TOTAL',sup:'AGENDADOS'},{rot:'%',sup:'AGENDADOS'},
+      {rot:'TOTAL',sup:'FLUXO'},{rot:'%',sup:'FLUXO'},
+      {rot:'TOTAL',sup:'VENDA'},{rot:'VS FLUXO',sup:'VENDA'},{rot:'VS ENTR.',sup:'VENDA'},
+      {rot:'TOTAL',sup:'FATURADOS'},{rot:'VS FLUXO',sup:'FATURADOS'},{rot:'VS ENTR.',sup:'FATURADOS'}
+    ];
+    const grupos = NOMES.map(n=>({rot:n,lojas:[n]}));
+    const linha=t=>{
+      const pEnc=pct(t.enc,t.ent), pAg=pct(t.ag,t.ent), pFl=pct(t.fl,t.ag),
+            pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
+            pFF=pct(t.ft,t.fl), pFE=pct(t.ft,t.ent);
+      return [
+        {t:t._rot,forte:true},{t:fmtNum(t.ent),forte:true},
+        {t:fmtNum(t.enc)},{t:t.ent?fmtPct(pEnc):'—',cor:t.ent?cls(pEnc):null},
+        {t:fmtNum(t.ag)},{t:t.ent?fmtPct(pAg):'—',cor:t.ent?cls(pAg):null},
+        {t:fmtNum(t.fl)},{t:t.ag?fmtPct(pFl):'—',cor:t.ag?cls(pFl):null},
+        {t:fmtNum(t.vd),forte:true},
+        {t:t.fl?fmtPct(pVF):'—',cor:t.fl?cls(pVF):null},
+        {t:t.ent?fmtPct(pVE):'—',cor:t.ent?cls(pVE):null},
+        {t:fmtNum(t.ft),forte:true},
+        {t:t.fl?fmtPct(pFF):'—',cor:t.fl?cls(pFF):null},
+        {t:t.ent?fmtPct(pFE):'—',cor:t.ent?cls(pFE):null}
+      ];
+    };
+    const tot={_rot:'EUROVIA GEELY',ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
+    const corpo=grupos.map(g=>{
+      const t=_celLojaDep(g.lojas,dep); t._rot=g.rot;
+      ['ent','enc','ag','fl','vd','ft'].forEach(k=>tot[k]+=t[k]);
+      return linha(t);
+    });
+    const rodape=linha(tot).map(c=>Object.assign({},c,{forte:true}));
+    desenharTabelaSlide(ctx,area,cols,corpo,rodape);
+  };
+}
+
 function atualizar(){
   if(slideAtual) setTimeout(()=>gerarSlide(slideAtual),0);
   desenharFiltro(); desenharPlacar(); desenharGeral(); desenharLojas(); desenharManual();
+  desenharRelatorioLoja(); desenharRelatorioVendedor();
   desenharCobertura(); desenharHistorico(); desenharMapaMidias(); desenharMapaEventos(); desenharMapaDepVenda();
   desenharLojasConfig(); marcarEstado();
 }
@@ -2155,6 +2705,46 @@ document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
   document.querySelectorAll('.painel').forEach(p=>p.hidden=p.id!=='aba-'+b.dataset.aba);
 }));
+
+/* === Relatório por loja / vendedor === */
+document.getElementById('btn-copiar-loja-vn').addEventListener('click',()=>copiarRelLoja('vn'));
+document.getElementById('btn-copiar-loja-vd').addEventListener('click',()=>copiarRelLoja('vd'));
+document.getElementById('btn-slide-loja-vn').addEventListener('click',()=>gerarSlide('funil-vn'));
+document.getElementById('btn-slide-loja-vd').addEventListener('click',()=>gerarSlide('funil-vd'));
+document.getElementById('btn-ordem-padrao-loja-vn').addEventListener('click',
+  ()=>resetarOrdem('lojaVN',desenharRelatorioLoja));
+document.getElementById('btn-ordem-padrao-loja-vd').addEventListener('click',
+  ()=>resetarOrdem('lojaVD',desenharRelatorioLoja));
+document.getElementById('btn-ordem-padrao-vendedor').addEventListener('click',
+  ()=>resetarOrdem('vendedor',desenharRelatorioVendedor));
+document.getElementById('btn-ordem-padrao-canais').addEventListener('click',
+  ()=>resetarOrdem('canais',()=>{ desenharGeral(); desenharLojas(); }));
+
+/* === Filtros do Relatório por vendedor === */
+async function _mudouFiltroVendedor(){
+  const f=estado.config.filtroVendedor||{dep:'',praca:'',loja:''};
+  f.dep=document.getElementById('filtro-vendedor-dep').value||'';
+  f.praca=document.getElementById('filtro-vendedor-praca').value||'';
+  f.loja=document.getElementById('filtro-vendedor-loja').value||'';
+  estado.config.filtroVendedor=f;
+  await guardar('config',estado.config);
+  desenharRelatorioVendedor();
+}
+document.getElementById('filtro-vendedor-dep').addEventListener('change',_mudouFiltroVendedor);
+document.getElementById('filtro-vendedor-praca').addEventListener('change',async e=>{
+  estado.config.filtroVendedor=estado.config.filtroVendedor||{};
+  estado.config.filtroVendedor.praca=e.target.value||'';
+  estado.config.filtroVendedor.loja='';
+  await guardar('config',estado.config);
+  desenharRelatorioVendedor();
+});
+document.getElementById('filtro-vendedor-loja').addEventListener('change',_mudouFiltroVendedor);
+document.getElementById('btn-limpar-filtro-vendedor').addEventListener('click',async()=>{
+  estado.config.filtroVendedor={dep:'',praca:'',loja:''};
+  await guardar('config',estado.config);
+  desenharRelatorioVendedor();
+});
+document.getElementById('btn-copiar-vendedor').addEventListener('click',copiarRelVendedor);
 document.getElementById('sel-loja-manual').addEventListener('change',e=>{ lojaManual=e.target.value; desenharManual(); });
 document.getElementById('btn-zerar-manual').addEventListener('click',async()=>{
   if(!confirm('Zerar todas as etapas de '+lojaManual+', em VN e VDA? Os números ficam no controle do manual.')) return;
@@ -2254,8 +2844,9 @@ document.getElementById('sel-vazias').addEventListener('change',async e=>{
 document.getElementById('btn-backup').addEventListener('click',()=>{
   const d=new Date(), p=n=>String(n).padStart(2,'0');
   baixar('backup-midia-geely-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json',
-    JSON.stringify({versao:2,painel:'midia-geely',gerado:new Date().toISOString(),
-      config:estado.config,dados:estado.dados,manual:estado.manual,fontes:estado.fontes,historico},null,1),'application/json');
+    JSON.stringify({versao:4,painel:'midia-geely',gerado:new Date().toISOString(),
+      config:estado.config,dados:estado.dados,vendedores:estado.vendedores||{},
+      manual:estado.manual,fontes:estado.fontes,historico},null,1),'application/json');
 });
 document.getElementById('btn-restaurar').addEventListener('click',()=>document.getElementById('arquivo-backup').click());
 document.getElementById('arquivo-backup').addEventListener('change',e=>{
@@ -2267,7 +2858,10 @@ document.getElementById('arquivo-backup').addEventListener('change',e=>{
       if(!o||!o.dados) throw new Error('formato');
       estado.config=Object.assign({},PADRAO.config,o.config||{});
       aplicarLojas(estado.config.lojas);
+      if(!estado.config.filtroVendedor) estado.config.filtroVendedor={dep:'',praca:'',loja:''};
+      if(!estado.config.ordem) estado.config.ordem=JSON.parse(JSON.stringify(ORDEM_PADRAO));
       estado.dados=normalizar(o.dados);
+      estado.vendedores=(o.vendedores&&typeof o.vendedores==='object')?o.vendedores:{};
       estado.fontes=o.fontes||{};
       estado.manual=(o.manual&&typeof o.manual==='object')?o.manual:((o.manualVd&&typeof o.manualVd==='object')?
         Object.keys(o.manualVd).reduce((a,k)=>{a[k+'|vd']=true;return a;},{}):{});
@@ -2297,7 +2891,7 @@ document.getElementById('btn-exportar').addEventListener('click',()=>{
 document.getElementById('btn-zerar').addEventListener('click',async()=>{
   if(!liberar('para apagar tudo')) return;
   if(!confirm('Isso apaga os números, as fontes e o histórico. O mapa de mídias é mantido. Continuar?')) return;
-  estado.dados=vazio(); estado.fontes={}; historico=[]; bruto=null;
+  estado.dados=vazio(); estado.vendedores={}; estado.fontes={}; historico=[]; bruto=null;
   await salvarTudo(); montarAjustes(); atualizar(); desenharImportacao();
   recado('recado-dados','Apagado');
 });
