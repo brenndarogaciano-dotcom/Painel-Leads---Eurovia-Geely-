@@ -282,7 +282,7 @@
       <div class="miolo">
         <div class="rolagem" id="tabela-geral"></div>
         <div class="legenda">
-          <span><b>%conv.:</b> vendas sobre entrantes, somando VN e VDA</span>
+          <span><b>% conv.:</b> em Vendas e Faturados, cada canal mostra a conversão sobre entrantes (VN+VDA)</span>
           <span class="pct-alto">acima do total</span>
           <span class="pct-medio">igual</span>
           <span class="pct-baixo">abaixo</span>
@@ -835,27 +835,37 @@ const lojasComDado=()=>lojasAtivas().filter(n=>temDado([n]));
 const ETAPAS_TAB=[['ent','Entrantes'],['ag','Agendados'],['fl','Fluxo'],['vd','Vendas'],['ft','Faturados']];
 function _extCanal(l,campo){
   if(campo==='canal') return l.canal||'';
-  if(campo==='conv')  return l.c.temEnt?l.c.conv:-1;
+  if(campo==='conv_vd') return l.c.total.ent?l.c.total.vd/l.c.total.ent:-1;
+  if(campo==='conv_ft') return l.c.total.ent?l.c.total.ft/l.c.total.ent:-1;
   const p=campo.split('_');
   if(p.length===2 && l.c[p[1]]) return +l.c[p[1]][p[0]]||0;
   return 0;
 }
 function tabelaCanais(lojas){
   const geral=celula(lojas,CANAIS);
+  const convGeralVd = geral.total.ent?geral.total.vd/geral.total.ent:0;
+  const convGeralFt = geral.total.ent?geral.total.ft/geral.total.ent:0;
   const usados=CANAIS.filter(m=>{
     if(estado.config.mostrarVazias) return true;
     const c=celula(lojas,[m]);
     return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
   });
+  /* etapas que ganham a coluna extra de conversão sobre entrantes */
+  const temConv=k=>k==='vd'||k==='ft';
+  const refConv=k=>k==='vd'?convGeralVd:convGeralFt;
   const linha=(rot,c,rodape)=>{
     let h='<tr>'+(rodape?'<th>'+rot+'</th>':'<th>'+rot+'</th>');
     ETAPAS_TAB.forEach(([k])=>{
       h+='<td class="'+(c.vn[k]?'':'zero')+'">'+fmtNum(c.vn[k])+'</td>'+
          '<td class="'+(c.vd[k]?'':'zero')+'">'+fmtNum(c.vd[k])+'</td>';
+      if(temConv(k)){
+        const totK=(+c.vn[k]||0)+(+c.vd[k]||0);
+        const conv=c.total.ent?totK/c.total.ent:0;
+        const classe = rodape?'' : (c.total.ent?classeComp(conv,refConv(k)):'');
+        h+='<td class="conv '+classe+'">'+(c.total.ent?fmtPct(conv):'—')+'</td>';
+      }
     });
-    h+='<td class="conv '+(rodape?'':(c.temEnt?classeComp(c.conv,geral.conv):''))+'">'+
-       (c.temEnt?fmtPct(c.conv):'—')+'</td></tr>';
-    return h;
+    return h+'</tr>';
   };
   const ord=(estado.config.ordem||{}).canais||{campo:'',dir:''};
   const linhas=usados.map(m=>({canal:m,c:celula(lojas,[m])}));
@@ -863,10 +873,14 @@ function tabelaCanais(lojas){
   const corpo=linhasOrd.map(l=>linha(l.canal,l.c,false)).join('');
   const T=(c,r,extra)=>thOrd('canais',c,r,extra).replace('<th','<th rowspan="2"');
   const S=(c,r,extra)=>thOrd('canais',c,r,extra);
-  const sup = ETAPAS_TAB.map(e=>'<th colspan="2">'+e[1]+'</th>').join('');
-  const subs = ETAPAS_TAB.map(e=>S(e[0]+'_vn','VN',' dep')+S(e[0]+'_vd','VDA',' dep')).join('');
+  const sup = ETAPAS_TAB.map(e=>'<th colspan="'+(temConv(e[0])?3:2)+'">'+e[1]+'</th>').join('');
+  const subs = ETAPAS_TAB.map(e=>{
+    let x=S(e[0]+'_vn','VN',' dep')+S(e[0]+'_vd','VDA',' dep');
+    if(temConv(e[0])) x+=S('conv_'+e[0],'% conv.',' dep');
+    return x;
+  }).join('');
   return '<table><thead>'+
-    '<tr>'+T('canal','Canal',' canal')+sup+T('conv','%conv.')+'</tr>'+
+    '<tr>'+T('canal','Canal',' canal')+sup+'</tr>'+
     '<tr class="sub">'+subs+'</tr>'+
     '</thead><tbody>'+corpo+'</tbody>'+
     '<tfoot>'+linha('Total',geral,true)+'</tfoot></table>';
@@ -897,7 +911,7 @@ function desenharGeral(){
   document.getElementById('dica-geral').innerHTML=
     'Entrantes saem da coluna <b>Fluxo Total Dia</b> do relatório, agendados de <b>Cli. Agendados</b>, '+
     'fluxo da soma de <b>Comp. Agendado</b> com <b>Comp. Não Agendado</b> e vendas de <b>Vendidos</b>. '+
-    'Cada etapa aparece dividida em VN e VDA, e o <b>%conv.</b> é a venda sobre o entrante somando os dois.';
+    'Cada etapa aparece dividida em VN e VDA. Vendas e Faturados ganham uma coluna extra <b>% conv.</b> com a taxa sobre entrantes (VN+VDA).';
 }
 function desenharLojas(){
   const alvo=document.getElementById('blocos-lojas');
@@ -924,14 +938,16 @@ function desenharLojas(){
 function desenharPlacar(){
   const lojas=lojasAtivas();
   const c=celula(lojas,CANAIS);
+  const convVd = c.total.ent?c.total.vd/c.total.ent:0;
+  const convFt = c.total.ent?c.total.ft/c.total.ent:0;
   document.getElementById('placar').innerHTML=
     '<div><span>Entrantes'+(lojaSel?' · '+lojaSel:(praca?' · '+praca:''))+'</span><strong>'+fmtNum(c.total.ent)+'</strong></div>'+
     '<div><span>Agendados</span><strong>'+fmtNum(c.total.ag)+'</strong></div>'+
     '<div><span>Fluxo</span><strong>'+fmtNum(c.total.fl)+'</strong></div>'+
     '<div><span>Vendas</span><strong class="destaque">'+fmtNum(c.total.vd)+'</strong></div>'+
+    '<div><span>% conv. venda</span><strong>'+(c.total.ent?fmtPct(convVd):'—')+'</strong></div>'+
     '<div><span>Faturados</span><strong>'+fmtNum(c.total.ft)+'</strong></div>'+
-    '<div><span>VN / VDA</span><strong>'+fmtNum(c.vn.vd)+' / '+fmtNum(c.vd.vd)+'</strong></div>'+
-    '<div><span>%conv.</span><strong>'+fmtPct(c.conv)+'</strong></div>';
+    '<div><span>% conv. faturado</span><strong>'+(c.total.ent?fmtPct(convFt):'—')+'</strong></div>';
 }
 function desenharFiltro(){
   const el=document.getElementById('filtro'); if(!el) return;
@@ -963,10 +979,23 @@ function copiarTabela(alvo){
     const c=celula(lojas,[m]);
     return c.total.ent||c.total.ag||c.total.fl||c.total.vd||c.total.ft;
   });
-  const cab1=['CANAL'].concat(ETAPAS_TAB.map(e=>e[1].toUpperCase()+'\t')).join('\t')+'\t%CONV.';
-  const cab2=[''].concat(ETAPAS_TAB.map(()=>'VN\tVDA')).join('\t');
-  const linha=(rot,c)=>[rot].concat(ETAPAS_TAB.map(([k])=>c.vn[k]+'\t'+c.vd[k]))
-    .join('\t')+'\t'+(c.temEnt?fmtPct(c.conv):'—');
+  const temConv=k=>k==='vd'||k==='ft';
+  const cab1=['CANAL'].concat(ETAPAS_TAB.map(e=>{
+    const r=e[1].toUpperCase();
+    return temConv(e[0]) ? r+'\t\t' : r+'\t';
+  })).join('\t');
+  const cab2=[''].concat(ETAPAS_TAB.map(e=>temConv(e[0])?'VN\tVDA\t% conv.':'VN\tVDA')).join('\t');
+  const linha=(rot,c)=>{
+    const partes=ETAPAS_TAB.map(([k])=>{
+      let p=c.vn[k]+'\t'+c.vd[k];
+      if(temConv(k)){
+        const totK=(+c.vn[k]||0)+(+c.vd[k]||0);
+        p+='\t'+(c.total.ent?fmtPct(totK/c.total.ent):'—');
+      }
+      return p;
+    });
+    return [rot].concat(partes).join('\t');
+  };
   const corpo=usados.map(m=>linha(m,celula(lojas,[m])));
   const txt=[cab1,cab2].concat(corpo).concat([linha('TOTAL',celula(lojas,CANAIS))]).join('\n');
   const id = alvo==='geral' ? 'recado-geral' : 'recado-loja-'+chave(alvo.split(':')[1]);
@@ -2405,38 +2434,31 @@ function _celLojaDep(lojas,dk){
   return t;
 }
 function _linhaRelLoja(rot,t){
-  const pEnc=pct(t.enc,t.ent), pAg=pct(t.ag,t.ent), pFl=pct(t.fl,t.ag),
-        pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
+  const pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
         pFF=pct(t.ft,t.fl), pFE=pct(t.ft,t.ent);
   const cls=p=>p>=0.5?'pct-alto':(p>=0.25?'pct-medio':'pct-baixo');
   return '<tr><th>'+rot+'</th>'+
     '<td class="'+(t.ent?'':'zero')+'">'+fmtNum(t.ent)+'</td>'+
     '<td class="'+(t.enc?'':'zero')+'">'+fmtNum(t.enc)+'</td>'+
-    '<td class="'+(t.ent?cls(pEnc):'zero')+'">'+(t.ent?fmtPct(pEnc):'—')+'</td>'+
     '<td class="'+(t.ag?'':'zero')+'">'+fmtNum(t.ag)+'</td>'+
-    '<td class="'+(t.ent?cls(pAg):'zero')+'">'+(t.ent?fmtPct(pAg):'—')+'</td>'+
     '<td class="'+(t.fl?'':'zero')+'">'+fmtNum(t.fl)+'</td>'+
-    '<td class="'+(t.ag?cls(pFl):'zero')+'">'+(t.ag?fmtPct(pFl):'—')+'</td>'+
     '<td class="'+(t.vd?'':'zero')+'">'+fmtNum(t.vd)+'</td>'+
-    '<td class="'+(t.fl?cls(pVF):'zero')+'">'+(t.fl?fmtPct(pVF):'—')+'</td>'+
     '<td class="'+(t.ent?cls(pVE):'zero')+'">'+(t.ent?fmtPct(pVE):'—')+'</td>'+
+    '<td class="'+(t.fl?cls(pVF):'zero')+'">'+(t.fl?fmtPct(pVF):'—')+'</td>'+
     '<td class="'+(t.ft?'':'zero')+'">'+fmtNum(t.ft)+'</td>'+
-    '<td class="'+(t.fl?cls(pFF):'zero')+'">'+(t.fl?fmtPct(pFF):'—')+'</td>'+
-    '<td class="'+(t.ent?cls(pFE):'zero')+'">'+(t.ent?fmtPct(pFE):'—')+'</td></tr>';
+    '<td class="'+(t.ent?cls(pFE):'zero')+'">'+(t.ent?fmtPct(pFE):'—')+'</td>'+
+    '<td class="'+(t.fl?cls(pFF):'zero')+'">'+(t.fl?fmtPct(pFF):'—')+'</td></tr>';
 }
 function _cabRelLoja(primeira,tabela){
   const T=(c,r)=>thOrd(tabela,c,r).replace('<th','<th rowspan="2"');
   const S=(c,r)=>thOrd(tabela,c,r);
   return '<thead>'+
-    '<tr>'+T('nome',primeira)+T('ent','Entrantes')+
-    '<th colspan="2">Encaminhados</th><th colspan="2">Agendados</th>'+
-    '<th colspan="2">Fluxo</th><th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
+    '<tr>'+T('nome',primeira)+T('ent','Entrantes')+T('enc','Encaminhados')+
+    T('ag','Agendados')+T('fl','Fluxo')+
+    '<th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
     '<tr class="sub">'+
-      S('enc','Total')+S('pct_enc','vs entrantes')+
-      S('ag','Total')+S('pct_ag','vs entrantes')+
-      S('fl','Total')+S('pct_fl','vs agendados')+
-      S('vd','Total')+S('pct_vf','vs fluxo')+S('pct_ve','vs entrantes')+
-      S('ft','Total')+S('pct_ff','vs fluxo')+S('pct_fe','vs entrantes')+
+      S('vd','Total')+S('pct_ve','vs entrantes')+S('pct_vf','vs fluxo')+
+      S('ft','Total')+S('pct_fe','vs entrantes')+S('pct_ff','vs fluxo')+
     '</tr></thead>';
 }
 function _extLoja(l,campo){
@@ -2479,14 +2501,12 @@ function desenharRelatorioLoja(){
   }));
 }
 function copiarRelLoja(dep){
-  const linhas=[['Loja','Entrantes','Encaminhados','% Enc','Agendados','% Ag','Fluxo','% Fluxo',
-    'Venda','% V/Fluxo','% V/Ent.','Faturados','% F/Fluxo','% F/Ent.']];
+  const linhas=[['Loja','Entrantes','Encaminhados','Agendados','Fluxo',
+    'Venda','% V/Ent.','% V/Fluxo','Faturados','% F/Ent.','% F/Fluxo']];
   const tot={ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
-  const addRow=(rot,t)=>linhas.push([rot,t.ent,t.enc,
-    t.ent?fmtPct(pct(t.enc,t.ent)):'',t.ag,t.ent?fmtPct(pct(t.ag,t.ent)):'',
-    t.fl,t.ag?fmtPct(pct(t.fl,t.ag)):'',
-    t.vd,t.fl?fmtPct(pct(t.vd,t.fl)):'',t.ent?fmtPct(pct(t.vd,t.ent)):'',
-    t.ft,t.fl?fmtPct(pct(t.ft,t.fl)):'',t.ent?fmtPct(pct(t.ft,t.ent)):'']);
+  const addRow=(rot,t)=>linhas.push([rot,t.ent,t.enc,t.ag,t.fl,
+    t.vd,t.ent?fmtPct(pct(t.vd,t.ent)):'',t.fl?fmtPct(pct(t.vd,t.fl)):'',
+    t.ft,t.ent?fmtPct(pct(t.ft,t.ent)):'',t.fl?fmtPct(pct(t.ft,t.fl)):'']);
   const dk = dep==='vn' ? 'vn' : 'vd';
   NOMES.forEach(n=>{ const t=_celLojaDep([n],dk); addRow(n,t);
     ['ent','enc','ag','fl','vd','ft'].forEach(k=>tot[k]+=t[k]); });
@@ -2523,6 +2543,8 @@ function _linhasVendedor(){
   lojasOk.forEach(loja=>{
     const vends=(estado.vendedores||{})[loja]||{};
     Object.keys(vends).forEach(nome=>{
+      /* ignora SEM VENDEDOR (lead sem atribuição) */
+      if(/^sem\s*vendedor$/i.test(String(nome).trim())) return;
       const v=vends[nome];
       if(f.dep && v.dep!==f.dep) return;
       const ent=+v.ent||0, enc=+v.enc||0, ag=+v.ag||0,
@@ -2566,50 +2588,43 @@ function desenharRelatorioVendedor(){
     return;
   }
   let corpo=''; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
-  /* para insucessos usamos a escala invertida: menos é melhor */
   const cls=p=>p>=0.5?'pct-alto':(p>=0.25?'pct-medio':'pct-baixo');
-  const clsIns=p=>p>=0.5?'pct-baixo':(p>=0.25?'pct-medio':'pct-alto');
   linhas.forEach(l=>{
-    const pAg=pct(l.ag,l.enc), pIE=pct(l.ins,l.enc), pFl=pct(l.fl,l.ag),
-          pVF=pct(l.vd,l.fl), pVE=pct(l.vd,l.enc),
+    const pVF=pct(l.vd,l.fl), pVE=pct(l.vd,l.enc),
           pFF=pct(l.ft,l.fl), pFE=pct(l.ft,l.enc);
-    corpo+='<tr><th>'+l.nome+'</th><td>'+l.loja+'</td><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
+    corpo+='<tr><th>'+l.loja+'</th><td>'+(l.dep==='vn'?'VN':'VDA')+'</td>'+
       '<td class="'+(l.enc?'':'zero')+'">'+fmtNum(l.enc)+'</td>'+
       '<td class="'+(l.ag?'':'zero')+'">'+fmtNum(l.ag)+'</td>'+
-      '<td class="'+(l.enc?cls(pAg):'zero')+'">'+(l.enc?fmtPct(pAg):'—')+'</td>'+
       '<td class="'+(l.ins?'':'zero')+'">'+fmtNum(l.ins)+'</td>'+
-      '<td class="'+(l.enc?clsIns(pIE):'zero')+'">'+(l.enc?fmtPct(pIE):'—')+'</td>'+
       '<td class="'+(l.fl?'':'zero')+'">'+fmtNum(l.fl)+'</td>'+
-      '<td class="'+(l.ag?cls(pFl):'zero')+'">'+(l.ag?fmtPct(pFl):'—')+'</td>'+
       '<td class="'+(l.vd?'':'zero')+'">'+fmtNum(l.vd)+'</td>'+
-      '<td class="'+(l.fl?cls(pVF):'zero')+'">'+(l.fl?fmtPct(pVF):'—')+'</td>'+
       '<td class="'+(l.enc?cls(pVE):'zero')+'">'+(l.enc?fmtPct(pVE):'—')+'</td>'+
+      '<td class="'+(l.fl?cls(pVF):'zero')+'">'+(l.fl?fmtPct(pVF):'—')+'</td>'+
       '<td class="'+(l.ft?'':'zero')+'">'+fmtNum(l.ft)+'</td>'+
-      '<td class="'+(l.fl?cls(pFF):'zero')+'">'+(l.fl?fmtPct(pFF):'—')+'</td>'+
-      '<td class="'+(l.enc?cls(pFE):'zero')+'">'+(l.enc?fmtPct(pFE):'—')+'</td></tr>';
+      '<td class="'+(l.enc?cls(pFE):'zero')+'">'+(l.enc?fmtPct(pFE):'—')+'</td>'+
+      '<td class="'+(l.fl?cls(pFF):'zero')+'">'+(l.fl?fmtPct(pFF):'—')+'</td></tr>';
     ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=l[k]);
   });
-  const pAg=pct(tot.ag,tot.enc), pIE=pct(tot.ins,tot.enc), pFl=pct(tot.fl,tot.ag),
-        pVF=pct(tot.vd,tot.fl), pVE=pct(tot.vd,tot.enc),
+  const pVF=pct(tot.vd,tot.fl), pVE=pct(tot.vd,tot.enc),
         pFF=pct(tot.ft,tot.fl), pFE=pct(tot.ft,tot.enc);
-  const rodape='<tr><th>TOTAL</th><td>—</td><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
-    '<td>'+fmtNum(tot.ag)+'</td><td>'+(tot.enc?fmtPct(pAg):'—')+'</td>'+
-    '<td>'+fmtNum(tot.ins)+'</td><td>'+(tot.enc?fmtPct(pIE):'—')+'</td>'+
-    '<td>'+fmtNum(tot.fl)+'</td><td>'+(tot.ag?fmtPct(pFl):'—')+'</td>'+
-    '<td>'+fmtNum(tot.vd)+'</td><td>'+(tot.fl?fmtPct(pVF):'—')+'</td>'+
+  const rodape='<tr><th>TOTAL</th><td>—</td><td>'+fmtNum(tot.enc)+'</td>'+
+    '<td>'+fmtNum(tot.ag)+'</td>'+
+    '<td>'+fmtNum(tot.ins)+'</td>'+
+    '<td>'+fmtNum(tot.fl)+'</td>'+
+    '<td>'+fmtNum(tot.vd)+'</td>'+
     '<td>'+(tot.enc?fmtPct(pVE):'—')+'</td>'+
-    '<td>'+fmtNum(tot.ft)+'</td><td>'+(tot.fl?fmtPct(pFF):'—')+'</td>'+
-    '<td>'+(tot.enc?fmtPct(pFE):'—')+'</td></tr>';
+    '<td>'+(tot.fl?fmtPct(pVF):'—')+'</td>'+
+    '<td>'+fmtNum(tot.ft)+'</td>'+
+    '<td>'+(tot.enc?fmtPct(pFE):'—')+'</td>'+
+    '<td>'+(tot.fl?fmtPct(pFF):'—')+'</td></tr>';
   const T=(c,r)=>thOrd('vendedor',c,r).replace('<th','<th rowspan="2"');
   const S=(c,r)=>thOrd('vendedor',c,r);
-  alvo.innerHTML='<table><thead><tr>'+T('nome','Vendedor')+T('loja','Loja')+T('dep','Dep')+
-    T('enc','Encaminhados')+'<th colspan="2">Agendados</th><th colspan="2">Insucessos</th>'+
-    '<th colspan="2">Fluxo</th><th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
-    '<tr class="sub">'+S('ag','Total')+S('pct_ag','vs encaminhados')+
-    S('ins','Total')+S('pct_ie','vs encaminhados')+
-    S('fl','Total')+S('pct_fl','vs agendados')+
-    S('vd','Total')+S('pct_vf','vs fluxo')+S('pct_ve','vs encaminhados')+
-    S('ft','Total')+S('pct_ff','vs fluxo')+S('pct_fe','vs encaminhados')+'</tr></thead>'+
+  alvo.innerHTML='<table><thead><tr>'+T('loja','Loja')+T('dep','Dep')+
+    T('enc','Encaminhados')+T('ag','Agendados')+T('ins','Insucessos')+T('fl','Fluxo')+
+    '<th colspan="3">Venda</th><th colspan="3">Faturados</th></tr>'+
+    '<tr class="sub">'+
+    S('vd','Total')+S('pct_ve','vs encaminhados')+S('pct_vf','vs fluxo')+
+    S('ft','Total')+S('pct_fe','vs encaminhados')+S('pct_ff','vs fluxo')+'</tr></thead>'+
     '<tbody>'+corpo+'</tbody><tfoot>'+rodape+'</tfoot></table>';
   const ord=(estado.config.ordem||{}).vendedor||{campo:'',dir:''};
   document.getElementById('selo-vendedor').textContent=
@@ -2622,24 +2637,18 @@ function desenharRelatorioVendedor(){
 }
 function copiarRelVendedor(){
   const linhas=_linhasVendedor();
-  const cab=['Vendedor','Loja','Dep','Encaminhados','Agendados','% Ag','Insucessos','% Ins',
-    'Fluxo','% Fluxo','Venda','% V/Fluxo','% V/Enc.','Faturados','% F/Fluxo','% F/Enc.'];
+  const cab=['Loja','Dep','Encaminhados','Agendados','Insucessos','Fluxo',
+    'Venda','% V/Enc.','% V/Fluxo','Faturados','% F/Enc.','% F/Fluxo'];
   const l=[cab]; const tot={enc:0,ag:0,ins:0,fl:0,vd:0,ft:0};
   linhas.forEach(r=>{
-    l.push([r.nome,r.loja,r.dep==='vn'?'VN':'VDA',r.enc,
-      r.ag,r.enc?fmtPct(pct(r.ag,r.enc)):'',
-      r.ins,r.enc?fmtPct(pct(r.ins,r.enc)):'',
-      r.fl,r.ag?fmtPct(pct(r.fl,r.ag)):'',
-      r.vd,r.fl?fmtPct(pct(r.vd,r.fl)):'',r.enc?fmtPct(pct(r.vd,r.enc)):'',
-      r.ft,r.fl?fmtPct(pct(r.ft,r.fl)):'',r.enc?fmtPct(pct(r.ft,r.enc)):'']);
+    l.push([r.loja,r.dep==='vn'?'VN':'VDA',r.enc,r.ag,r.ins,r.fl,
+      r.vd,r.enc?fmtPct(pct(r.vd,r.enc)):'',r.fl?fmtPct(pct(r.vd,r.fl)):'',
+      r.ft,r.enc?fmtPct(pct(r.ft,r.enc)):'',r.fl?fmtPct(pct(r.ft,r.fl)):'']);
     ['enc','ag','ins','fl','vd','ft'].forEach(k=>tot[k]+=r[k]);
   });
-  l.push(['TOTAL','','',tot.enc,
-    tot.ag,tot.enc?fmtPct(pct(tot.ag,tot.enc)):'',
-    tot.ins,tot.enc?fmtPct(pct(tot.ins,tot.enc)):'',
-    tot.fl,tot.ag?fmtPct(pct(tot.fl,tot.ag)):'',
-    tot.vd,tot.fl?fmtPct(pct(tot.vd,tot.fl)):'',tot.enc?fmtPct(pct(tot.vd,tot.enc)):'',
-    tot.ft,tot.fl?fmtPct(pct(tot.ft,tot.fl)):'',tot.enc?fmtPct(pct(tot.ft,tot.enc)):'']);
+  l.push(['TOTAL','',tot.enc,tot.ag,tot.ins,tot.fl,
+    tot.vd,tot.enc?fmtPct(pct(tot.vd,tot.enc)):'',tot.fl?fmtPct(pct(tot.vd,tot.fl)):'',
+    tot.ft,tot.enc?fmtPct(pct(tot.ft,tot.enc)):'',tot.fl?fmtPct(pct(tot.ft,tot.fl)):'']);
   navigator.clipboard.writeText(l.map(r=>r.join('\t')).join('\n'))
     .then(()=>recado('recado-vendedor','Copiado'))
     .catch(()=>recado('recado-vendedor','Não deu para copiar','var(--alerta)'));
@@ -2654,29 +2663,24 @@ function slideFunil(dep){
     const area=molduraSlide(ctx,W,H,titulo,sub);
     const cls=p=>p>=0.5?'ok':(p>=0.25?'atencao':'alerta');
     const cols=[
-      {rot:'LOJA',esq:true},{rot:'ENTRANTES'},
-      {rot:'TOTAL',sup:'ENCAMINHADOS'},{rot:'%',sup:'ENCAMINHADOS'},
-      {rot:'TOTAL',sup:'AGENDADOS'},{rot:'%',sup:'AGENDADOS'},
-      {rot:'TOTAL',sup:'FLUXO'},{rot:'%',sup:'FLUXO'},
-      {rot:'TOTAL',sup:'VENDA'},{rot:'VS FLUXO',sup:'VENDA'},{rot:'VS ENTR.',sup:'VENDA'},
-      {rot:'TOTAL',sup:'FATURADOS'},{rot:'VS FLUXO',sup:'FATURADOS'},{rot:'VS ENTR.',sup:'FATURADOS'}
+      {rot:'LOJA',esq:true},{rot:'ENTRANTES'},{rot:'ENCAMINHADOS'},
+      {rot:'AGENDADOS'},{rot:'FLUXO'},
+      {rot:'TOTAL',sup:'VENDA'},{rot:'VS ENTR.',sup:'VENDA'},{rot:'VS FLUXO',sup:'VENDA'},
+      {rot:'TOTAL',sup:'FATURADOS'},{rot:'VS ENTR.',sup:'FATURADOS'},{rot:'VS FLUXO',sup:'FATURADOS'}
     ];
     const grupos = NOMES.map(n=>({rot:n,lojas:[n]}));
     const linha=t=>{
-      const pEnc=pct(t.enc,t.ent), pAg=pct(t.ag,t.ent), pFl=pct(t.fl,t.ag),
-            pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
+      const pVF=pct(t.vd,t.fl), pVE=pct(t.vd,t.ent),
             pFF=pct(t.ft,t.fl), pFE=pct(t.ft,t.ent);
       return [
         {t:t._rot,forte:true},{t:fmtNum(t.ent),forte:true},
-        {t:fmtNum(t.enc)},{t:t.ent?fmtPct(pEnc):'—',cor:t.ent?cls(pEnc):null},
-        {t:fmtNum(t.ag)},{t:t.ent?fmtPct(pAg):'—',cor:t.ent?cls(pAg):null},
-        {t:fmtNum(t.fl)},{t:t.ag?fmtPct(pFl):'—',cor:t.ag?cls(pFl):null},
+        {t:fmtNum(t.enc)},{t:fmtNum(t.ag)},{t:fmtNum(t.fl)},
         {t:fmtNum(t.vd),forte:true},
-        {t:t.fl?fmtPct(pVF):'—',cor:t.fl?cls(pVF):null},
         {t:t.ent?fmtPct(pVE):'—',cor:t.ent?cls(pVE):null},
+        {t:t.fl?fmtPct(pVF):'—',cor:t.fl?cls(pVF):null},
         {t:fmtNum(t.ft),forte:true},
-        {t:t.fl?fmtPct(pFF):'—',cor:t.fl?cls(pFF):null},
-        {t:t.ent?fmtPct(pFE):'—',cor:t.ent?cls(pFE):null}
+        {t:t.ent?fmtPct(pFE):'—',cor:t.ent?cls(pFE):null},
+        {t:t.fl?fmtPct(pFF):'—',cor:t.fl?cls(pFF):null}
       ];
     };
     const tot={_rot:'EUROVIA GEELY',ent:0,enc:0,ag:0,fl:0,vd:0,ft:0};
