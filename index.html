@@ -430,7 +430,7 @@
             <input type="text" id="aba-google" spellcheck="false" placeholder="SETEMBRO2026"></div>
         </div>
         <div class="barra">
-          <button class="acao principal" id="btn-ler-google">Ler vendas do Google</button>
+          <button class="acao principal" id="btn-ler-google">Ler vendas e faturados</button>
           <button class="acao miudo" id="btn-abrir-google">Abrir planilha</button>
           <span class="recado" id="recado-google">Pronto</span>
         </div>
@@ -1683,10 +1683,22 @@ async function lerVendasGoogle(){
       aba:aba||'aba única',matriz,cab:0,colunas:{}}])};
     registrarTipos(); registrarDepVenda();
     await guardar('config',estado.config);
-    selo('google','planilha lida · confira abaixo','ok');
-    caixaGoogle('Lidas <b>'+fmtNum(matriz.length)+'</b> linhas da aba <b>'+aba+'</b>. Confira o resumo no bloco de importação e clique em <b>Aplicar no painel</b>.','ok');
+    selo('google','lendo e aplicando…','ok');
     desenharImportacao();
-    recado('recado-google','Planilha lida');
+    /* roda a aplicação direto para já trazer vendas e faturados ao painel,
+       sem precisar passar pelo botão "Aplicar no painel" */
+    try{
+      await aplicar();
+      selo('google','vendas e faturados aplicados','ok');
+      caixaGoogle('Lidas <b>'+fmtNum(matriz.length)+'</b> linhas da aba <b>'+aba+'</b>. '+
+        'Vendas e faturados já estão no painel.','ok');
+      recado('recado-google','Aplicado');
+    }catch(ea){
+      selo('google','planilha lida, mas a aplicação falhou','ruim');
+      caixaGoogle('A planilha foi lida (<b>'+fmtNum(matriz.length)+'</b> linhas) mas a aplicação falhou: '+ea.message+
+        '. Tente clicar em <b>Aplicar no painel</b> no bloco de importação.','ruim');
+      recado('recado-google','Falhou ao aplicar','var(--alerta)');
+    }
   }catch(e){
     selo('google','não consegui ler','ruim');
     caixaGoogle('Não deu para ler: '+e.message+
