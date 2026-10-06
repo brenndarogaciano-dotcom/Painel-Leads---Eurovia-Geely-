@@ -1192,17 +1192,16 @@ function blocoVendas(it,idx,naoMapGeral){
   const r=processarVendas(it);
   Object.keys(r.naoMapeados).forEach(k=>naoMapGeral[k]=(naoMapGeral[k]||0)+r.naoMapeados[k]);
   const mes=r.alvo.mes?(MESES_NOME[r.alvo.mes-1]+' de '+r.alvo.ano):'mês não reconhecido pelo nome da aba';
+  const vendasContadas=r.linhas-r.semDep-r.semLoja;
   let g='<div class="caixa"><b>Vendas e faturados</b> · '+it.nome+' · aba <b>'+it.aba+'</b> · '+mes+
-    '<br><b>Vendas:</b> '+fmtNum(r.linhas)+' linhas com data = '+fmtNum(r.linhas-r.foraDoMes)+' do mês da aba + '+
-    fmtNum(r.foraDoMes)+' de outros meses, que não contam como venda'+
-    '<br><b>Faturados:</b> toda linha com NF preenchida, de qualquer mês — '+fmtNum(r.faturados)+
-    (r.fatOutroMes?', sendo '+fmtNum(r.fatOutroMes)+' de vendas de meses anteriores':'')+
-    (r.semData?' · '+fmtNum(r.semData)+' linha(s) começadas sem data':'')+
+    '<br><b>Vendas:</b> toda linha preenchida (data, cliente ou vendedor) — '+fmtNum(vendasContadas)+' entraram na conta'+
+    (r.semDep?' · '+fmtNum(r.semDep)+' sem departamento (fora)':'')+
+    (r.semLoja?' · '+fmtNum(r.semLoja)+' sem loja (fora)':'')+
+    '<br><b>Faturados:</b> toda linha com <code>NF</code> preenchida (coluna E), de qualquer mês — '+fmtNum(r.faturados)+
     '<br><b>Lojas no arquivo:</b> '+(r.lojas.length?r.lojas.join(' · '):'nenhuma')+
-    (Object.keys(r.naoRec).length?'<br><span class="ruim">Loja não reconhecida na coluna LOJA: '+
-      Object.keys(r.naoRec).map(x=>x+' ('+fmtNum(r.naoRec[x])+' vendas)').join(' · ')+
-      '. Inclua no bloco <b>Lojas Geely</b> para ela entrar.</span>':'')+
-    (r.semLoja?'<br><span class="aten">'+fmtNum(r.semLoja)+' venda(s) sem loja preenchida, ignoradas.</span>':'')+
+    (Object.keys(r.naoRec).length?'<br><span class="ruim">Loja não reconhecida: '+
+      Object.keys(r.naoRec).map(x=>x+' ('+fmtNum(r.naoRec[x])+')').join(' · ')+
+      '. Inclua no bloco <b>Lojas Geely</b> ou use coluna LOJA na planilha.</span>':'')+
     '</div>';
   g+='<div class="grade-mapa"><div><label class="campo">Aba do mês</label><select data-vd="aba" data-i="'+idx+'">'+
      it.ordem.map(n=>'<option value="'+n.replace(/"/g,'&quot;')+'"'+(n===it.aba?' selected':'')+'>'+n+'</option>').join('')+
@@ -1554,15 +1553,26 @@ function processarVendas(it){
              o painel reconhece os valores VN (veículos novos) e VD (venda direta) direto */
           cDep=idx(['departamento','dep','pfvd','pfpj','vnvd','vdvn']),
           cVend=idx(['vendedor']), cCli=idx(['cliente']);
-    /* abas antigas não têm coluna LOJA: nelas o nome está no título do bloco */
-    let lojaDoBloco=null;
+    /* abas antigas não têm coluna LOJA: nelas o nome está no título do bloco.
+       Fallback: se o título for uma praça (PERNAMBUCO, PARAÍBA, BAHIA) e essa praça
+       tiver só UMA loja Geely configurada, atribui direto a ela. */
+    let lojaDoBloco=null, pracaDoBloco=null;
     if(cLoja<0){
       for(let i=0;i<cab.length;i++){
         const t=String(cab[i]==null?'':cab[i]).trim();
         if(!t||chave(t)==='datadavenda') continue;
         const achou=acharLoja(t);
         if(achou){ lojaDoBloco=achou; break; }
-        if(!blocoSemLoja[t] && chave(t).length>2 && ['nf','midia','evento','cliente','telefone','modelo','vendedor','status','pfpj','pfvd','departamento','dep','consultores'].indexOf(chave(t))<0)
+        /* detecta nome de praça no título do bloco */
+        const kp=chave(t);
+        const achouPraca=PRACAS.find(p=>chave(p)===kp);
+        if(achouPraca){
+          const lojasPraca=(PRACA_LOJAS[achouPraca]||[]);
+          if(lojasPraca.length===1){ lojaDoBloco=lojasPraca[0]; pracaDoBloco=achouPraca; break; }
+          /* mais de uma loja na praça: não dá para desambiguar, cai como loja não reconhecida */
+          if(lojasPraca.length>1){ pracaDoBloco=achouPraca; blocoSemLoja[t+' (praça com '+lojasPraca.length+' lojas)']=0; break; }
+        }
+        if(!blocoSemLoja[t] && chave(t).length>2 && ['nf','midia','evento','cliente','telefone','modelo','vendedor','status','pfpj','pfvd','departamento','dep','consultores','consultora'].indexOf(chave(t))<0)
           blocoSemLoja[t]=0;
       }
     }
