@@ -295,8 +295,9 @@
   </section>
 
   <section class="painel" id="aba-lancar" hidden>
+
     <div class="bloco">
-      <h2>Lançamento manual <span class="selo-estado" id="selo-manual">grava a cada campo alterado</span>
+      <h2>Lançar por mídia <span class="selo-estado" id="selo-manual">grava a cada campo alterado</span>
         <span class="controles">
           <label for="sel-loja-manual">Loja</label>
           <select id="sel-loja-manual" style="width:auto"></select>
@@ -310,6 +311,58 @@
           <span class="recado" id="recado-manual">Salvo</span>
         </div>
         <div class="caixa" id="caixa-manual"></div>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Lançar por loja <span class="selo-estado">totais por loja/dep</span></h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div><label class="campo" for="ml-loja">Loja</label>
+            <select id="ml-loja"></select></div>
+          <div><label class="campo" for="ml-dep">Departamento</label>
+            <select id="ml-dep"><option value="vn">VN</option><option value="vd">VDA</option></select></div>
+          <div><label class="campo" for="ml-ent">Entrantes</label><input type="number" id="ml-ent" min="0"></div>
+          <div><label class="campo" for="ml-enc">Encaminhados</label><input type="number" id="ml-enc" min="0"></div>
+          <div><label class="campo" for="ml-ag">Agendados</label><input type="number" id="ml-ag" min="0"></div>
+          <div><label class="campo" for="ml-fl">Fluxo</label><input type="number" id="ml-fl" min="0"></div>
+          <div><label class="campo" for="ml-vd">Vendas</label><input type="number" id="ml-vd" min="0"></div>
+          <div><label class="campo" for="ml-ft">Faturados</label><input type="number" id="ml-ft" min="0"></div>
+          <div><label class="campo" for="ml-ins">Insucessos</label><input type="number" id="ml-ins" min="0"></div>
+        </div>
+        <div class="barra">
+          <button class="acao principal" id="btn-ml-aplicar">Aplicar na loja</button>
+          <button class="acao miudo" id="btn-ml-carregar">Carregar valores atuais</button>
+          <span class="recado" id="recado-ml">Aplicado</span>
+        </div>
+        <p class="dica">Define os totais da loja direto por departamento, sem precisar escolher mídia. Os números entram no canal <code>SEM MIDIA</code> da loja escolhida e passam a mandar sobre o relatório desse campo até você zerar. Útil quando você quer corrigir só o total sem reimportar o relatório.</p>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <h2>Lançar por vendedor <span class="selo-estado" id="selo-vend-manual">adicione ou edite vendedores</span></h2>
+      <div class="miolo">
+        <div class="grade-mapa">
+          <div><label class="campo" for="mv-nome">Nome do vendedor</label>
+            <input type="text" id="mv-nome" placeholder="Ex.: Nicolas Roberto"></div>
+          <div><label class="campo" for="mv-loja">Loja</label>
+            <select id="mv-loja"></select></div>
+          <div><label class="campo" for="mv-dep">Departamento</label>
+            <select id="mv-dep"><option value="vn">VN</option><option value="vd">VDA</option></select></div>
+          <div><label class="campo" for="mv-enc">Encaminhados</label><input type="number" id="mv-enc" min="0"></div>
+          <div><label class="campo" for="mv-ag">Agendados</label><input type="number" id="mv-ag" min="0"></div>
+          <div><label class="campo" for="mv-ins">Insucessos</label><input type="number" id="mv-ins" min="0"></div>
+          <div><label class="campo" for="mv-fl">Fluxo</label><input type="number" id="mv-fl" min="0"></div>
+          <div><label class="campo" for="mv-vd">Vendas</label><input type="number" id="mv-vd" min="0"></div>
+          <div><label class="campo" for="mv-ft">Faturados</label><input type="number" id="mv-ft" min="0"></div>
+        </div>
+        <div class="barra">
+          <button class="acao principal" id="btn-mv-salvar">Salvar vendedor</button>
+          <button class="acao" id="btn-mv-limpar">Limpar campos</button>
+          <span class="recado" id="recado-mv">Salvo</span>
+        </div>
+        <div class="rolagem" id="tabela-mv-lista" style="margin-top:16px"></div>
+        <p class="dica">Cadastra ou atualiza um vendedor direto no painel. Se o nome já existir na loja, os números são sobrescritos. Para remover, apague a linha pelo botão X na tabela abaixo.</p>
       </div>
     </div>
   </section>
@@ -1161,16 +1214,17 @@ function processarItem(it){
     res[loja]=res[loja]||{};
     res[loja][dep]=res[loja][dep]||{};
     res[loja][dep][canal]=(res[loja][dep][canal]||0)+1;
-    /* Encaminhados: na Geely todo lead que entra na conta já tem evento válido,
-       então enc = ent sempre; o campo é mantido para paridade com a Renault */
-    if(it.fonte==='ent'){
+    /* Vendedor + regra de encaminhados: SEM VENDEDOR (ou vazio) não entra em enc */
+    const nomeVend=it.colunas.vendedor>=0 ? String(l[it.colunas.vendedor]==null?'':l[it.colunas.vendedor]).trim() : '';
+    const semVendedor = !nomeVend || /^sem\s*vendedor$/i.test(nomeVend);
+    /* Encaminhados: só conta quando a linha tem vendedor identificado (não SEM VENDEDOR) */
+    if(it.fonte==='ent' && !semVendedor){
       resEnc[loja]=resEnc[loja]||{};
       resEnc[loja][dep]=resEnc[loja][dep]||{};
       resEnc[loja][dep][canal]=(resEnc[loja][dep][canal]||0)+1;
     }
-    /* Por vendedor: usa o nome cru como chave (quando a coluna existe) */
-    const nomeVend=it.colunas.vendedor>=0 ? String(l[it.colunas.vendedor]==null?'':l[it.colunas.vendedor]).trim() : '';
-    if(nomeVend){
+    /* Por vendedor: pula SEM VENDEDOR também */
+    if(nomeVend && !semVendedor){
       resVend[loja]=resVend[loja]||{};
       resVend[loja][nomeVend]=resVend[loja][nomeVend]||{dep:dep};
       resVend[loja][nomeVend][it.fonte]=(resVend[loja][nomeVend][it.fonte]||0)+1;
@@ -1192,12 +1246,12 @@ function blocoVendas(it,idx,naoMapGeral){
   const r=processarVendas(it);
   Object.keys(r.naoMapeados).forEach(k=>naoMapGeral[k]=(naoMapGeral[k]||0)+r.naoMapeados[k]);
   const mes=r.alvo.mes?(MESES_NOME[r.alvo.mes-1]+' de '+r.alvo.ano):'mês não reconhecido pelo nome da aba';
-  const vendasContadas=r.linhas-r.semDep-r.semLoja;
   let g='<div class="caixa"><b>Vendas e faturados</b> · '+it.nome+' · aba <b>'+it.aba+'</b> · '+mes+
-    '<br><b>Vendas:</b> toda linha preenchida (data, cliente ou vendedor) — '+fmtNum(vendasContadas)+' entraram na conta'+
-    (r.semDep?' · '+fmtNum(r.semDep)+' sem departamento (fora)':'')+
-    (r.semLoja?' · '+fmtNum(r.semLoja)+' sem loja (fora)':'')+
-    '<br><b>Faturados:</b> toda linha com <code>NF</code> preenchida (coluna E), de qualquer mês — '+fmtNum(r.faturados)+
+    '<br><b>Vendas:</b> só linhas com data em '+mes+' — <b>'+fmtNum(r.vendasNoMes)+'</b>'+
+    (r.foraDoMes?' · '+fmtNum(r.foraDoMes)+' linha(s) de outros meses não entraram em vendas':'')+
+    '<br><b>Faturados:</b> toda linha com <code>NF</code> preenchida (coluna E), de qualquer mês — <b>'+fmtNum(r.faturados)+'</b>'+
+    (r.semDep?'<br><span class="aten">'+fmtNum(r.semDep)+' linha(s) sem departamento, fora da conta</span>':'')+
+    (r.semLoja?'<br><span class="aten">'+fmtNum(r.semLoja)+' linha(s) sem loja, fora da conta</span>':'')+
     '<br><b>Lojas no arquivo:</b> '+(r.lojas.length?r.lojas.join(' · '):'nenhuma')+
     (Object.keys(r.naoRec).length?'<br><span class="ruim">Loja não reconhecida: '+
       Object.keys(r.naoRec).map(x=>x+' ('+fmtNum(r.naoRec[x])+')').join(' · ')+
@@ -1542,7 +1596,7 @@ function processarVendas(it){
   const alvo=mesDaAba(it.aba)||{mes:0,ano:0};
   const titulos=linhasTitulo(it.matriz);
   const res={}, resVend={}, tipos={}, naoMapeados={}, naoRec={}, pendentes={}, deps={}, lojasVistas=[], blocoSemLoja={};
-  let linhas=0, semDep=0, semLoja=0, faturados=0, semNF=0;
+  let linhas=0, semDep=0, semLoja=0, faturados=0, semNF=0, vendasNoMes=0, foraDoMes=0;
   titulos.forEach((ini,j)=>{
     const fim = j+1<titulos.length ? titulos[j+1] : it.matriz.length;
     const cab=it.matriz[ini]||[];
@@ -1580,10 +1634,16 @@ function processarVendas(it){
       const l=it.matriz[i]; if(!l) continue;
       if(!linhaTemDado(l,cData,cCli,cVend)) continue;
       linhas++;
-      /* Qualquer coisa preenchida na NF conta como faturado */
+      /* Qualquer coisa preenchida na NF conta como faturado, de qualquer mês */
       const nfRaw=cNF>=0?l[cNF]:null;
       const temNF=nfPreenchida(nfRaw);
       if(!temNF) semNF++;
+      /* Para VENDA só conta se a data cair no mês da aba */
+      const d=cData>=0?dataDaVenda(l[cData]):null;
+      const noMes = d && alvo.mes>0 && d.mes===alvo.mes && d.ano===alvo.ano;
+      if(noMes) vendasNoMes++; else foraDoMes++;
+      /* se não é do mês E não tem NF, a linha não contribui para nada: pula */
+      if(!noMes && !temNF) continue;
       /* a loja vem da coluna LOJA (nova) ou do título do bloco (antigo) */
       const cruLoja=cLoja>=0?l[cLoja]:'';
       const loja=cLoja>=0?acharLoja(cruLoja):lojaDoBloco;
@@ -1618,8 +1678,8 @@ function processarVendas(it){
       res[loja]=res[loja]||{};
       res[loja][depKey]=res[loja][depKey]||{};
       res[loja][depKey][canal]=res[loja][depKey][canal]||{vd:0,ft:0};
-      /* toda linha preenchida = venda; NF preenchida (qualquer valor) adiciona faturado */
-      res[loja][depKey][canal].vd++;
+      /* VENDA só se a data cair no mês da aba; FATURADO sempre que a NF estiver preenchida */
+      if(noMes) res[loja][depKey][canal].vd++;
       if(temNF){ res[loja][depKey][canal].ft++; faturados++; }
       /* por vendedor (se a coluna existir e tiver nome) */
       const nomeVend=cVend>=0?String(l[cVend]==null?'':l[cVend]).trim():'';
@@ -1627,14 +1687,14 @@ function processarVendas(it){
         resVend[loja]=resVend[loja]||{};
         resVend[loja][nomeVend]=resVend[loja][nomeVend]||{dep:depKey,vd:0,ft:0};
         resVend[loja][nomeVend].dep=depKey;
-        resVend[loja][nomeVend].vd++;
+        if(noMes) resVend[loja][nomeVend].vd++;
         if(temNF) resVend[loja][nomeVend].ft++;
       }
     }
   });
   Object.keys(blocoSemLoja).forEach(k=>{ if(blocoSemLoja[k]) naoRec[k]=(naoRec[k]||0)+blocoSemLoja[k]; });
   return {res,resVend,lojas:lojasVistas,tipos,naoMapeados,naoRec,pendentes,deps,
-    linhas,semDep,semLoja,faturados,semNF,alvo};
+    linhas,semDep,semLoja,faturados,semNF,vendasNoMes,foraDoMes,alvo};
 }
 
 /* ============ vendas pelo Google Sheets ============ */
@@ -2716,10 +2776,124 @@ function slideFunil(dep){
   };
 }
 
+/* ============ Lançar por loja (totais) ============ */
+function _preencherSelectLojas(selId){
+  const sel=document.getElementById(selId); if(!sel) return;
+  const atual=sel.value;
+  sel.innerHTML=NOMES.map(n=>'<option value="'+n+'">'+n+'</option>').join('');
+  if(atual && NOMES.indexOf(atual)>=0) sel.value=atual;
+}
+function carregarMlDaLoja(){
+  const loja=document.getElementById('ml-loja').value;
+  const dep=document.getElementById('ml-dep').value;
+  if(!loja||!dep) return;
+  const r=(((estado.dados[loja]||{})[dep]||{})['SEM MIDIA'])||{};
+  document.getElementById('ml-ent').value=+r.ent||0;
+  document.getElementById('ml-enc').value=+r.enc||0;
+  document.getElementById('ml-ag').value=+r.ag||0;
+  document.getElementById('ml-fl').value=(+r.cAg||0)+(+r.cNao||0);
+  document.getElementById('ml-vd').value=+r.vd||0;
+  document.getElementById('ml-ft').value=+r.ft||0;
+  document.getElementById('ml-ins').value=+r.ins||0;
+}
+async function aplicarMl(){
+  const loja=document.getElementById('ml-loja').value;
+  const dep=document.getElementById('ml-dep').value;
+  if(!loja||!dep){ recado('recado-ml','Escolha loja e departamento','var(--alerta)'); return; }
+  const num=id=>Math.max(0,+document.getElementById(id).value||0);
+  const r={ent:num('ml-ent'),enc:num('ml-enc'),ag:num('ml-ag'),
+    cAg:num('ml-fl'),cNao:0, vd:num('ml-vd'),ft:num('ml-ft'),ins:num('ml-ins')};
+  /* grava em 'SEM MIDIA' e trava campos como manuais para não serem sobrescritos pela importação */
+  estado.dados[loja]=estado.dados[loja]||{};
+  estado.dados[loja][dep]=estado.dados[loja][dep]||{};
+  estado.dados[loja][dep]['SEM MIDIA']=Object.assign(estado.dados[loja][dep]['SEM MIDIA']||{},r);
+  ['ent','enc','ag','cAg','cNao','vd','ft','ins'].forEach(k=>{
+    estado.manual[loja+'|'+dep+'|'+k]=true;
+  });
+  await guardar('dados',estado.dados);
+  await guardar('manual',estado.manual);
+  recado('recado-ml','Aplicado em '+loja+' / '+(dep==='vn'?'VN':'VDA'));
+  atualizar();
+}
+
+/* ============ Lançar por vendedor ============ */
+function limparFormMv(){
+  ['mv-nome','mv-enc','mv-ag','mv-ins','mv-fl','mv-vd','mv-ft'].forEach(id=>document.getElementById(id).value='');
+}
+async function salvarMv(){
+  const nome=document.getElementById('mv-nome').value.trim();
+  const loja=document.getElementById('mv-loja').value;
+  const dep=document.getElementById('mv-dep').value;
+  if(!nome){ recado('recado-mv','Informe o nome do vendedor','var(--alerta)'); return; }
+  if(!loja){ recado('recado-mv','Escolha a loja','var(--alerta)'); return; }
+  const num=id=>Math.max(0,+document.getElementById(id).value||0);
+  estado.vendedores=estado.vendedores||{};
+  estado.vendedores[loja]=estado.vendedores[loja]||{};
+  estado.vendedores[loja][nome]={dep,
+    enc:num('mv-enc'),ag:num('mv-ag'),ins:num('mv-ins'),
+    cAg:num('mv-fl'),cNao:0,
+    vd:num('mv-vd'),ft:num('mv-ft')};
+  /* ent é mantido como enc para compatibilidade com códigos antigos que usam v.ent */
+  estado.vendedores[loja][nome].ent=num('mv-enc');
+  await guardar('vendedores',estado.vendedores);
+  recado('recado-mv',nome+' salvo em '+loja);
+  limparFormMv();
+  desenharListaMv();
+  atualizar();
+}
+function desenharListaMv(){
+  const alvo=document.getElementById('tabela-mv-lista'); if(!alvo) return;
+  const vendedores=[];
+  Object.keys(estado.vendedores||{}).forEach(loja=>{
+    Object.keys(estado.vendedores[loja]||{}).forEach(nome=>{
+      const v=estado.vendedores[loja][nome];
+      vendedores.push({loja,nome,dep:v.dep||'',enc:+v.enc||0,ag:+v.ag||0,
+        ins:+v.ins||0,fl:(+v.cAg||0)+(+v.cNao||0),vd:+v.vd||0,ft:+v.ft||0});
+    });
+  });
+  if(!vendedores.length){
+    alvo.innerHTML='<p class="dica">Nenhum vendedor cadastrado ainda.</p>';
+    return;
+  }
+  vendedores.sort((a,b)=>a.loja.localeCompare(b.loja)||a.nome.localeCompare(b.nome));
+  const linhas=vendedores.map(v=>'<tr>'+
+    '<th>'+v.nome+'</th><td>'+v.loja+'</td><td>'+(v.dep==='vn'?'VN':'VDA')+'</td>'+
+    '<td>'+fmtNum(v.enc)+'</td><td>'+fmtNum(v.ag)+'</td><td>'+fmtNum(v.ins)+'</td>'+
+    '<td>'+fmtNum(v.fl)+'</td><td>'+fmtNum(v.vd)+'</td><td>'+fmtNum(v.ft)+'</td>'+
+    '<td><button class="acao miudo" data-mv-edit="'+v.loja+'|'+v.nome+'">editar</button> '+
+    '<button class="acao miudo" data-mv-del="'+v.loja+'|'+v.nome+'">×</button></td></tr>').join('');
+  alvo.innerHTML='<table><thead><tr><th>Vendedor</th><th>Loja</th><th>Dep</th>'+
+    '<th>Enc</th><th>Ag</th><th>Ins</th><th>Fluxo</th><th>Vd</th><th>Ft</th><th></th></tr></thead>'+
+    '<tbody>'+linhas+'</tbody></table>';
+  alvo.querySelectorAll('[data-mv-edit]').forEach(b=>b.addEventListener('click',()=>{
+    const [loja,nome]=b.dataset.mvEdit.split('|');
+    const v=(estado.vendedores[loja]||{})[nome]||{};
+    document.getElementById('mv-nome').value=nome;
+    document.getElementById('mv-loja').value=loja;
+    document.getElementById('mv-dep').value=v.dep||'vn';
+    document.getElementById('mv-enc').value=+v.enc||0;
+    document.getElementById('mv-ag').value=+v.ag||0;
+    document.getElementById('mv-ins').value=+v.ins||0;
+    document.getElementById('mv-fl').value=(+v.cAg||0)+(+v.cNao||0);
+    document.getElementById('mv-vd').value=+v.vd||0;
+    document.getElementById('mv-ft').value=+v.ft||0;
+  }));
+  alvo.querySelectorAll('[data-mv-del]').forEach(b=>b.addEventListener('click',async()=>{
+    const [loja,nome]=b.dataset.mvDel.split('|');
+    if(!confirm('Remover '+nome+' de '+loja+'?')) return;
+    if(estado.vendedores[loja]) delete estado.vendedores[loja][nome];
+    await guardar('vendedores',estado.vendedores);
+    desenharListaMv();
+    atualizar();
+    recado('recado-mv',nome+' removido');
+  }));
+}
+
 function atualizar(){
   if(slideAtual) setTimeout(()=>gerarSlide(slideAtual),0);
   desenharFiltro(); desenharPlacar(); desenharGeral(); desenharLojas(); desenharManual();
   desenharRelatorioLoja(); desenharRelatorioVendedor();
+  _preencherSelectLojas('ml-loja'); _preencherSelectLojas('mv-loja'); desenharListaMv();
   desenharCobertura(); desenharHistorico(); desenharMapaMidias(); desenharMapaEventos(); desenharMapaDepVenda();
   desenharLojasConfig(); marcarEstado();
 }
@@ -2731,6 +2905,16 @@ document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()
   document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
   document.querySelectorAll('.painel').forEach(p=>p.hidden=p.id!=='aba-'+b.dataset.aba);
 }));
+
+/* === Lançar por loja (totais) === */
+document.getElementById('btn-ml-aplicar').addEventListener('click',aplicarMl);
+document.getElementById('btn-ml-carregar').addEventListener('click',carregarMlDaLoja);
+document.getElementById('ml-loja').addEventListener('change',carregarMlDaLoja);
+document.getElementById('ml-dep').addEventListener('change',carregarMlDaLoja);
+
+/* === Lançar por vendedor === */
+document.getElementById('btn-mv-salvar').addEventListener('click',salvarMv);
+document.getElementById('btn-mv-limpar').addEventListener('click',limparFormMv);
 
 /* === Relatório por loja / vendedor === */
 document.getElementById('btn-copiar-loja-vn').addEventListener('click',()=>copiarRelLoja('vn'));
