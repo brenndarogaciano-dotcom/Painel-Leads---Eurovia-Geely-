@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel Leads - Geely · Grupo Eurovia</title>
 <meta name="theme-color" content="#16181a">
-<link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAD2klEQVR42u2bz28bRRTHP29md22TEkRUKWpoUqCkoZEaAgqF/hBI/DggceTM/9O/gDtXLhxQD4gDUFVAo7YUKa2i0lIgBTVpftlxnN3xznCwjVontb1rDsWelSzLa8/beZ95s+/7nm2hy+Gcc/yPDxGRju8PquO9glDD4Hwnn2TQHe8WDYohP9SwrX67r2rYnG+HMPRbQIZx9bumQQ/AA/AAPAAPwAPwADwAD8ADGPwjaD9hnePHG8vcuvsnSDY+IoIxhqPjY3x4Zp6Ll67xYH2bMAzIWnKICElieHlynHfeOMmFzz5ndX0zsy3nHGGgef/8aT569yztnbF9Hi4u3ebn5XuZnW9dTCnFVmWXnd09ytUaSity11siVGsxtTimXN3JZUtEMPWUL7/+ju+vXOu+BW7dWSGKwv72lSgQ6NyP7dGWUgiC9GFMK0WgNVdu3OwOwKYOecr2qfuPxh/kmc8CHoAH4AG05Y0hF0LOOUTlDwwRwTbtuObrPCmsNc7hwLmmxhCE/LbsARpiH4Aw0FRqMSpn3k3TlEOliGIUoUWo7SUEWuWadJwYFBCFAVoHbJfLBIEmq64SBUmcUCrs1zf72uJ7xrC5vYMoyZ6ABZx1PD86QjGKqMUJW5UqSknmSbdsjT13iEIYsraxyerDdbTWZCfQeJqcOMJIqdQ5Ai4vXue3P+4T5LhQa9VefeUlzr85z6WfrnJv5S8KYZhLwsaJ4dTJad56/RQrqxtsVfbQOs/CCDa16GCT6WNdAHzx1Tek1uXSsSJgTJ1ff7/PzPEpLn77A+WdKoHWOeYsxHHMg4ebzM3OsLh0lySpNyIzx7zqJmV1q8z0sYnOAJ4pFnCicglQETB1S7EYYa2jVIhwzqGV5AIQBppCsQBAMQrRSuW+odZ1ShRGPZTD1uHE5i3eGuOb4e6cw1qLoPJELdbax2z18y3ek8Z7IeQBeADte2WQ3e3hHjA6OoK1rq8OzNPpuiPUPTREzi68RnV3FxFBNTV0nodzDhH6svFoHSFCH3OBNLXMvPhC9zT4wbnTrK1tcPnqL8i/ebe3fdHoCtcxpkigNfW6pRYnTSGUXQnuxQl1YxAa+sKY7EKosaUdb8+dYHpqopdiKODTTz5mbnaa60vLlMuVnruxooQ4NszPznB4bIz3zi1w8/YdopxSOEkMZxbmKRUi5k5M8ffaRu8SXQRrLc+OlDg+eYSj44cP/pj/jZBPgx6AB+ABeAAegAfgAXgAHsBwApBBK/yzFVziI6BFYhhX/7F7wDBB8P8bfBTGQScHtUlyUJSrXj84iM4/MQIGKRq6LeY/VXGhfymQ0LkAAAAASUVORK5CYII=">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAD2klEQVR42u2bz28bRRTHP29md22TEkRUKWpoUqCkoZEaAgqF/hBI/DggceTM/9O/gDtXLhxQD4gDUFVAo7YUKa2i0lIgBTVpftlxnN3xznCwjVontb1rDsWelSzLa8/beZ95s+/7nm2hy+Gcc/yPDxGRju8PquO9glDD4Hwnn2TQHe8WDYohP9SwrX67r2rYnG+HMPRbQIZx9bumQQ/AA/AAPAAPwAPwADwAD8ADGPwjaD9hnePHG8vcuvsnSDY+IoIxhqPjY3x4Zp6Ll67xYH2bMAzIWnKICElieHlynHfeOMmFzz5ndX0zsy3nHGGgef/8aT569yztnbF9Hi4u3ebn5XuZnW9dTCnFVmWXnd09ytUaSity11siVGsxtTimXN3JZUtEMPWUL7/+ju+vXOu+BW7dWSGKwv72lSgQ6NyP7dGWUgiC9GFMK0WgNVdu3OwOwKYOecr2qfuPxh/kmc8CHoAH4AG05Y0hF0LOOUTlDwwRwTbtuObrPCmsNc7hwLmmxhCE/LbsARpiH4Aw0FRqMSpn3k3TlEOliGIUoUWo7SUEWuWadJwYFBCFAVoHbJfLBIEmq64SBUmcUCrs1zf72uJ7xrC5vYMoyZ6ABZx1PD86QjGKqMUJW5UqSknmSbdsjT13iEIYsraxyerDdbTWZCfQeJqcOMJIqdQ5Ai4vXue3P+4T5LhQa9VefeUlzr85z6WfrnJv5S8KYZhLwsaJ4dTJad56/RQrqxtsVfbQOs/CCDa16GCT6WNdAHzx1Tek1uXSsSJgTJ1ff7/PzPEpLn77A+WdKoHWOeYsxHHMg4ebzM3OsLh0lySpNyIzx7zqJmV1q8z0sYnOAJ4pFnCicglQETB1S7EYYa2jVIhwzqGV5AIQBppCsQBAMQrRSuW+odZ1ShRGPZTD1uHE5i3eGuOb4e6cw1qLoPJELdbax2z18y3ek8Z7IeQBeADte2WQ3e3hHjA6OoK1rq8OzNPpuiPUPTREzi68RnV3FxFBNTV0nodzDhH6svFoHSFCH3OBNLXMvPhC9zT4wbnTrK1tcPnqL8i/ebe3fdHoCtcxpkigNfW6pRYnTSGUXQnuxQl1YxAa+sKY7EKosaUdb8+dYHpqopdiKODTTz5mbnaa60vLlMuVnruxooQ4NszPznB4bIz3zi1w8/YdopxSOEkMZxbmKRUi5k5M8ffaRu8SXQRrLc+OlDg+eYSj44cP/pj/jZBPgx6AB+ABeAAegAfgAXgAHsBwApBBK/yzFVziI6BFYhhX/7F7wDBB8P8bfBTGQScHtUlyUJSrXj84iM4/MQIGKRq6LeY/VXGhfymQ0LkAAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAD2klEQVR42u2bz28bRRTHP29md22TEkRUKWpoUqCkoZEaAgqF/hBI/DggceTM/9O/gDtXLhxQD4gDUFVAo7YUKa2i0lIgBTVpftlxnN3xznCwjVontb1rDsWelSzLa8/beZ95s+/7nm2hy+Gcc/yPDxGRju8PquO9glDD4Hwnn2TQHe8WDYohP9SwrX67r2rYnG+HMPRbQIZx9bumQQ/AA/AAPAAPwAPwADwAD8ADGPwjaD9hnePHG8vcuvsnSDY+IoIxhqPjY3x4Zp6Ll67xYH2bMAzIWnKICElieHlynHfeOMmFzz5ndX0zsy3nHGGgef/8aT569yztnbF9Hi4u3ebn5XuZnW9dTCnFVmWXnd09ytUaSity11siVGsxtTimXN3JZUtEMPWUL7/+ju+vXOu+BW7dWSGKwv72lSgQ6NyP7dGWUgiC9GFMK0WgNVdu3OwOwKYOecr2qfuPxh/kmc8CHoAH4AG05Y0hF0LOOUTlDwwRwTbtuObrPCmsNc7hwLmmxhCE/LbsARpiH4Aw0FRqMSpn3k3TlEOliGIUoUWo7SUEWuWadJwYFBCFAVoHbJfLBIEmq64SBUmcUCrs1zf72uJ7xrC5vYMoyZ6ABZx1PD86QjGKqMUJW5UqSknmSbdsjT13iEIYsraxyerDdbTWZCfQeJqcOMJIqdQ5Ai4vXue3P+4T5LhQa9VefeUlzr85z6WfrnJv5S8KYZhLwsaJ4dTJad56/RQrqxtsVfbQOs/CCDa16GCT6WNdAHzx1Tek1uXSsSJgTJ1ff7/PzPEpLn77A+WdKoHWOeYsxHHMg4ebzM3OsLh0lySpNyIzx7zqJmV1q8z0sYnOAJ4pFnCicglQETB1S7EYYa2jVIhwzqGV5AIQBppCsQBAMQrRSuW+odZ1ShRGPZTD1uHE5i3eGuOb4e6cw1qLoPJELdbax2z18y3ek8Z7IeQBeADte2WQ3e3hHjA6OoK1rq8OzNPpuiPUPTREzi68RnV3FxFBNTV0nodzDhH6svFoHSFCH3OBNLXMvPhC9zT4wbnTrK1tcPnqL8i/ebe3fdHoCtcxpkigNfW6pRYnTSGUXQnuxQl1YxAa+sKY7EKosaUdb8+dYHpqopdiKODTTz5mbnaa60vLlMuVnruxooQ4NszPznB4bIz3zi1w8/YdopxSOEkMZxbmKRUi5k5M8ffaRu8SXQRrLc+OlDg+eYSj44cP/pj/jZBPgx6AB+ABeAAegAfgAXgAHsBwApBBK/yzFVziI6BFYhhX/7F7wDBB8P8bfBTGQScHtUlyUJSrXj84iM4/MQIGKRq6LeY/VXGhfymQ0LkAAAAASUVORK5CYII=">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Painel Geely">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Painel Geely">
+<meta name="theme-color" content="#101214">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Painel%20Leads%20-%20Geely%22%2C%22short_name%22%3A%22Painel%20Geely%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23101214%22%2C%22theme_color%22%3A%22%23101214%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage/png%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAD2klEQVR42u2bz28bRRTHP29md22TEkRUKWpoUqCkoZEaAgqF/hBI/DggceTM/9O/gDtXLhxQD4gDUFVAo7YUKa2i0lIgBTVpftlxnN3xznCwjVontb1rDsWelSzLa8/beZ95s%2B/7nm2hy%2BGcc/yPDxGRju8PquO9glDD4Hwnn2TQHe8WDYohP9SwrX67r2rYnG%2BHMPRbQIZx9bumQQ/AA/AAPAAPwAPwADwAD8ADGPwjaD9hnePHG8vcuvsnSDY%2BIoIxhqPjY3x4Zp6Ll67xYH2bMAzIWnKICElieHlynHfeOMmFzz5ndX0zsy3nHGGgef/8aT569yztnbF9Hi4u3ebn5XuZnW9dTCnFVmWXnd09ytUaSity11siVGsxtTimXN3JZUtEMPWUL7/%2Bju%2BvXOu%2BBW7dWSGKwv72lSgQ6NyP7dGWUgiC9GFMK0WgNVdu3OwOwKYOecr2qfuPxh/kmc8CHoAH4AG05Y0hF0LOOUTlDwwRwTbtuObrPCmsNc7hwLmmxhCE/LbsARpiH4Aw0FRqMSpn3k3TlEOliGIUoUWo7SUEWuWadJwYFBCFAVoHbJfLBIEmq64SBUmcUCrs1zf72uJ7xrC5vYMoyZ6ABZx1PD86QjGKqMUJW5UqSknmSbdsjT13iEIYsraxyerDdbTWZCfQeJqcOMJIqdQ5Ai4vXue3P%2B4T5LhQa9VefeUlzr85z6WfrnJv5S8KYZhLwsaJ4dTJad56/RQrqxtsVfbQOs/CCDa16GCT6WNdAHzx1Tek1uXSsSJgTJ1ff7/PzPEpLn77A%2BWdKoHWOeYsxHHMg4ebzM3OsLh0lySpNyIzx7zqJmV1q8z0sYnOAJ4pFnCicglQETB1S7EYYa2jVIhwzqGV5AIQBppCsQBAMQrRSuW%2BodZ1ShRGPZTD1uHE5i3eGuOb4e6cw1qLoPJELdbax2z18y3ek8Z7IeQBeADte2WQ3e3hHjA6OoK1rq8OzNPpuiPUPTREzi68RnV3FxFBNTV0nodzDhH6svFoHSFCH3OBNLXMvPhC9zT4wbnTrK1tcPnqL8i/ebe3fdHoCtcxpkigNfW6pRYnTSGUXQnuxQl1YxAa%2BsKY7EKosaUdb8%2BdYHpqopdiKODTTz5mbnaa60vLlMuVnruxooQ4NszPznB4bIz3zi1w8/YdopxSOEkMZxbmKRUi5k5M8ffaRu8SXQRrLc%2BOlDg%2BeYSj44cP/pj/jZBPgx6AB%2BABeAAegAfgAXgAHsBwApBBK/yzFVziI6BFYhhX/7F7wDBB8P8bfBTGQScHtUlyUJSrXj84iM4/MQIGKRq6LeY/VXGhfymQ0LkAAAAASUVORK5CYII%3D%22%2C%22sizes%22%3A%2264x64%22%2C%22type%22%3A%22image/png%22%7D%5D%7D">
 <meta name="apple-mobile-web-app-title" content="Geely Eurovia">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -185,6 +189,7 @@
     <h1>Painel <em>leads</em> - Geely</h1>
     <span class="carimbo" id="carimbo-mes">Agosto 2026 · Geely</span>
     <span class="carimbo secundaria" id="carimbo-fonte">Sem atualização nesta sessão</span>
+    <button class="acao principal" id="btn-atualizar-topo" style="margin-left:auto">↻ Atualizar</button>
   </header>
 
   <div class="placar" id="placar"></div>
@@ -666,6 +671,7 @@ const chaveMidia=s=>String(s==null?'':s).trim().replace(/\s+/g,' ');
 /* Link fixo da planilha de vendas: troque aqui e o painel já abre apontando
    para ela. O que você digitar em Ajustes vale por cima deste valor. */
 const LINK_VENDAS_PADRAO='https://docs.google.com/spreadsheets/d/1fosg38GfRRib1lgG7AopyArG835aBA7xUJyiStsUr5M/edit?usp=sharing';
+const URL_DRIVE_PADRAO='https://script.google.com/macros/s/AKfycbz2VZRfdZGyzFfEQjZNNakZDZE_d-ysrGbnek7ZKQeF7UOSb7NmwNvn5_gTbcxufIIO/exec';
 
 /* departamento das vendas, coluna PF/PJ da planilha */
 const DEP_VENDA_PADRAO={'PF':'vn','VD':'vd'};
@@ -730,7 +736,7 @@ const vazio=()=>{
 const PADRAO={
   manual:{},
   config:Object.assign({rotuloMes:'Agosto 2026 · Geely',tamanhoSlide:'pequeno',mostrarVazias:false,lojas:LOJAS_PADRAO.slice(),
-    linkVendas:LINK_VENDAS_PADRAO,abaVendas:'',urlDrive:'',autoDrive:false,
+    linkVendas:LINK_VENDAS_PADRAO,abaVendas:'',urlDrive:URL_DRIVE_PADRAO,autoDrive:false,
     filtroVendedor:{dep:'',praca:'',loja:''},
     ordem:JSON.parse(JSON.stringify(ORDEM_PADRAO))},
     (function(){const i=mapaInicial(), e=mapaEventoInicial();
@@ -3024,6 +3030,28 @@ document.getElementById('auto-drive').addEventListener('change',async e=>{
 });
 document.getElementById('btn-subir-drive').addEventListener('click',subirDrive);
 document.getElementById('btn-baixar-drive').addEventListener('click',()=>baixarDrive(false));
+/* botão ATUALIZAR no topo: busca o último backup do Drive sem senha e sem confirmação */
+document.getElementById('btn-atualizar-topo').addEventListener('click',async e=>{
+  const btn=e.currentTarget;
+  const url=(estado.config.urlDrive||URL_DRIVE_PADRAO||'').trim();
+  if(!url){ alert('Nenhum endereço de Drive configurado. Ajuste em Ajustes → Backup no Google Drive.'); return; }
+  btn.disabled=true;
+  const txtOriginal=btn.textContent;
+  btn.textContent='↻ atualizando…';
+  try{
+    const r=await fetch(url+(url.indexOf('?')>=0?'&':'?')+'acao=ultimo',{redirect:'follow'});
+    if(!r.ok) throw new Error('o Drive respondeu '+r.status);
+    const o=await r.json();
+    if(!o.ok) throw new Error(o.erro||'nada no Drive');
+    await aplicarPacote(o.pacote||o.conteudo);
+    btn.textContent='✓ atualizado';
+    setTimeout(()=>{ btn.textContent=txtOriginal; btn.disabled=false; },1800);
+  }catch(err){
+    btn.textContent='✗ falhou';
+    setTimeout(()=>{ btn.textContent=txtOriginal; btn.disabled=false; },2200);
+    console.error('ATUALIZAR falhou:',err);
+  }
+});
 document.getElementById('btn-testar-drive').addEventListener('click',testarDrive);
 document.getElementById('btn-mapa-padrao').addEventListener('click',async()=>{
   if(!confirm('Voltar o mapa de mídias ao padrão? Os tipos que você classificou à mão voltam ao original.')) return;
@@ -3109,7 +3137,7 @@ document.getElementById('btn-zerar').addEventListener('click',async()=>{
 function montarAjustes(){
   document.getElementById('link-vendas').value=estado.config.linkVendas||LINK_VENDAS_PADRAO||'';
   document.getElementById('aba-google').value=estado.config.abaVendas||abaSugerida();
-  document.getElementById('url-drive').value=estado.config.urlDrive||'';
+  document.getElementById('url-drive').value=estado.config.urlDrive||URL_DRIVE_PADRAO||'';
   document.getElementById('auto-drive').value=estado.config.autoDrive?'1':'0';
   selo('google',estado.config.linkVendas?'link guardado':'nenhum link configurado',estado.config.linkVendas?'ok':'');
   selo('drive',estado.config.urlDrive?(estado.config.driveEm?'último envio '+dataBR(estado.config.driveEm):'app configurado'):'não configurado',
